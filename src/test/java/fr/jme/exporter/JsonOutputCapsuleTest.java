@@ -331,7 +331,7 @@ class JsonOutputCapsuleTest {
     jGenerator.writeEndObject();
     jGenerator.close();
     System.out.println(stringWriter.toString());
-    Assertions.assertEquals("{\"myField\":\"1 2 4\"}", stringWriter.toString());
+    Assertions.assertEquals("{\"myField\":[1,2,4]}", stringWriter.toString());
   }
 
   @org.junit.jupiter.api.Test

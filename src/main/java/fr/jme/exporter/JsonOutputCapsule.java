@@ -14,7 +14,6 @@ import java.nio.ShortBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
-import java.util.IdentityHashMap;
 import java.util.Map;
 import org.w3c.dom.Element;
 
@@ -87,7 +86,6 @@ public class JsonOutputCapsule implements OutputCapsule {
     for (int i = 0; i < value.length; i++) {
 
       jsonGenerator.writeArray(value[i], 0, value[i].length);
-
     }
     jsonGenerator.writeEndArray();
   }
@@ -297,18 +295,11 @@ public class JsonOutputCapsule implements OutputCapsule {
     if (value == null || value.equals(defVal)) {
       return;
     }
-    StringBuilder buf = new StringBuilder();
+    jsonGenerator.writeArrayFieldStart(name);
     for (int i = value.nextSetBit(0); i >= 0; i = value.nextSetBit(i + 1)) {
-      buf.append(i);
-      buf.append(" ");
+      jsonGenerator.writeNumber(i);
     }
-
-    if (buf.length() > 0) {
-      // remove last space
-      buf.setLength(buf.length() - 1);
-    }
-
-    jsonGenerator.writeStringField(name, buf.toString());
+    jsonGenerator.writeEndArray();
   }
 
   @Override
@@ -436,18 +427,18 @@ public class JsonOutputCapsule implements OutputCapsule {
       throws IOException {
     if (value == null) return;
     if (Arrays.deepEquals(value, defVal)) return;
-/*
-    Element el = appendElement(name);
-    int size = value.length;
-    el.setAttribute(XMLExporter.ATTRIBUTE_SIZE, String.valueOf(size));
+    /*
+       Element el = appendElement(name);
+       int size = value.length;
+       el.setAttribute(XMLExporter.ATTRIBUTE_SIZE, String.valueOf(size));
 
-    for (int i = 0; i < size; i++) {
-      ArrayList[] vi = value[i];
-      writeSavableArrayListArray(vi, "SavableArrayListArray_" + i, null);
-    }
-    currentElement = (Element) el.getParentNode();
+       for (int i = 0; i < size; i++) {
+         ArrayList[] vi = value[i];
+         writeSavableArrayListArray(vi, "SavableArrayListArray_" + i, null);
+       }
+       currentElement = (Element) el.getParentNode();
 
- */
+    */
   }
 
   @Override
@@ -539,17 +530,17 @@ public class JsonOutputCapsule implements OutputCapsule {
       return;
     }
     jsonGenerator.writeFieldName(name);
-/*
-    for (Entry<? extends Savable> entry : map) {
-      int key = entry.getKey();
+    /*
+       for (Entry<? extends Savable> entry : map) {
+         int key = entry.getKey();
 
-      Element mapEntry = appendElement("MapEntry");
-      mapEntry.setAttribute("key", Integer.toString(key));
-      Savable s = entry.getValue();
-      write(s, "Savable", null);
-    }
+         Element mapEntry = appendElement("MapEntry");
+         mapEntry.setAttribute("key", Integer.toString(key));
+         Savable s = entry.getValue();
+         write(s, "Savable", null);
+       }
 
- */
+    */
 
   }
 
@@ -701,7 +692,6 @@ public class JsonOutputCapsule implements OutputCapsule {
     value.position(pos);
     jsonGenerator.writeStringField(dataAttributeName, buf.toString());
   }
-
 
   @Override
   public void write(Enum value, String name, Enum defVal) throws IOException {

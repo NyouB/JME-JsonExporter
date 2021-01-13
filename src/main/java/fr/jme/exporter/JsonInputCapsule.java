@@ -441,27 +441,18 @@ public class JsonInputCapsule implements InputCapsule {
   }
 
   public BitSet readBitSet(String name, BitSet defVal) throws IOException {
-    String tmpString = currentElem.getAttribute(name);
-    if (tmpString == null || tmpString.length() < 1) return defVal;
-    try {
-      BitSet set = new BitSet();
-      String[] strings = parseTokens(tmpString);
-      for (int i = 0; i < strings.length; i++) {
-        int isSet = Integer.parseInt(strings[i]);
-        if (isSet == 1) {
-          set.set(i);
-        }
-      }
-      return set;
-    } catch (NumberFormatException nfe) {
-      IOException io = new IOException(nfe.toString());
-      io.initCause(nfe);
-      throw io;
-    } catch (DOMException de) {
-      IOException io = new IOException(de.toString());
-      io.initCause(de);
-      throw io;
+    if (!rootNode.has(name)) {
+      return defVal;
     }
+    JsonNode arrayNode = rootNode.get(name);
+    if (arrayNode == null || arrayNode.size() < 1) {
+      return defVal;
+    }
+    BitSet res = new BitSet();
+    for (int i = 0; i < arrayNode.size(); i++) {
+      res.set(arrayNode.get(i).asInt());
+    }
+    return res;
   }
 
   public Savable readSavable(String name, Savable defVal) throws IOException {

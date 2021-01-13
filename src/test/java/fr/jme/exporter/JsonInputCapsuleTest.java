@@ -3,6 +3,7 @@ package fr.jme.exporter;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.BitSet;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -310,7 +311,20 @@ class JsonInputCapsuleTest {
   }
 
   @Test
-  void readBitSet() {}
+  void readBitSet() throws IOException {
+    String json ="{\"myField\":[1,2,4]}";
+    BitSet expected = new BitSet();
+    expected.set(0, false);
+    expected.set(1, true);
+    expected.set(2, true);
+    expected.set(3, false);
+    expected.set(4, true);
+    JsonInputCapsule jsonInputCapsule =
+        new JsonInputCapsule(new ByteArrayInputStream(json.getBytes()), new JsonImporter());
+    BitSet res = jsonInputCapsule.readBitSet("myField", null);
+    Assertions.assertEquals(expected, res);
+    Assertions.assertEquals(new BitSet(), jsonInputCapsule.readBitSet("doestnotexists", new BitSet()));
+  }
 
   @Test
   void readSavable() {}
