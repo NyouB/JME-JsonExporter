@@ -18,12 +18,13 @@ import java.nio.ShortBuffer;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.DOMException;
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -33,8 +34,8 @@ public class JsonInputCapsule implements InputCapsule {
   private final JsonImporter importer;
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private JsonNode rootNode = null;
+  private JsonNode currentNode = null;
 
-  private Document doc;
   private Element currentElem;
   private boolean isAtRoot = true;
   private Map<String, Savable> referencedSavables = new HashMap<String, Savable>();
@@ -44,6 +45,17 @@ public class JsonInputCapsule implements InputCapsule {
 
   public JsonInputCapsule(InputStream stream, JsonImporter importer) throws IOException {
     rootNode = OBJECT_MAPPER.readTree(stream);
+    currentNode = rootNode;
+    this.importer = importer;
+    if (rootNode.has("format_version")) {
+      String version = rootNode.get("format_version").textValue();
+      importer.formatVersion = version.equals("") ? 0 : Integer.parseInt(version);
+    }
+  }
+
+  public JsonInputCapsule(String json, JsonImporter importer) throws IOException {
+    rootNode = OBJECT_MAPPER.readTree(json);
+    currentNode = rootNode;
     this.importer = importer;
     if (rootNode.has("format_version")) {
       String version = rootNode.get("format_version").textValue();
@@ -99,10 +111,10 @@ public class JsonInputCapsule implements InputCapsule {
   }
 
   public byte readByte(String name, byte defVal) throws IOException {
-    if (!rootNode.has(name)) {
+    if (!currentNode.has(name)) {
       return defVal;
     }
-    String tmpString = rootNode.get(name).asText();
+    String tmpString = currentNode.get(name).asText();
     if (tmpString == null || tmpString.length() < 1) return defVal;
     try {
       return Byte.parseByte(tmpString);
@@ -114,10 +126,10 @@ public class JsonInputCapsule implements InputCapsule {
   }
 
   public byte[] readByteArray(String name, byte[] defVal) throws IOException {
-    if (!rootNode.has(name)) {
+    if (!currentNode.has(name)) {
       return defVal;
     }
-    String tmpString = rootNode.get(name).asText();
+    String tmpString = currentNode.get(name).asText();
     if (tmpString == null || tmpString.length() < 1) {
       return defVal;
     }
@@ -125,10 +137,10 @@ public class JsonInputCapsule implements InputCapsule {
   }
 
   public byte[][] readByteArray2D(String name, byte[][] defVal) throws IOException {
-    if (!rootNode.has(name)) {
+    if (!currentNode.has(name)) {
       return defVal;
     }
-    JsonNode nodeArray = rootNode.get(name);
+    JsonNode nodeArray = currentNode.get(name);
     if (nodeArray == null || nodeArray.size() < 1) {
       return defVal;
     }
@@ -140,17 +152,17 @@ public class JsonInputCapsule implements InputCapsule {
   }
 
   public int readInt(String name, int defVal) throws IOException {
-    if (!rootNode.has(name)) {
+    if (!currentNode.has(name)) {
       return defVal;
     }
-    return rootNode.get(name).asInt(defVal);
+    return currentNode.get(name).asInt(defVal);
   }
 
   public int[] readIntArray(String name, int[] defVal) throws IOException {
-    if (!rootNode.has(name)) {
+    if (!currentNode.has(name)) {
       return defVal;
     }
-    JsonNode arrayNode = rootNode.get(name);
+    JsonNode arrayNode = currentNode.get(name);
     if (arrayNode == null || arrayNode.size() < 1) {
       return defVal;
     }
@@ -163,10 +175,10 @@ public class JsonInputCapsule implements InputCapsule {
   }
 
   public int[][] readIntArray2D(String name, int[][] defVal) throws IOException {
-    if (!rootNode.has(name)) {
+    if (!currentNode.has(name)) {
       return defVal;
     }
-    JsonNode arrayNode = rootNode.get(name);
+    JsonNode arrayNode = currentNode.get(name);
     if (arrayNode == null || arrayNode.size() < 1) {
       return defVal;
     }
@@ -184,17 +196,17 @@ public class JsonInputCapsule implements InputCapsule {
   }
 
   public float readFloat(String name, float defVal) throws IOException {
-    if (!rootNode.has(name)) {
+    if (!currentNode.has(name)) {
       return defVal;
     }
-    return Float.parseFloat(rootNode.get(name).asText());
+    return Float.parseFloat(currentNode.get(name).asText());
   }
 
   public float[] readFloatArray(String name, float[] defVal) throws IOException {
-    if (!rootNode.has(name)) {
+    if (!currentNode.has(name)) {
       return defVal;
     }
-    JsonNode arrayNode = rootNode.get(name);
+    JsonNode arrayNode = currentNode.get(name);
     if (arrayNode == null || arrayNode.size() < 1) {
       return defVal;
     }
@@ -207,10 +219,10 @@ public class JsonInputCapsule implements InputCapsule {
   }
 
   public float[][] readFloatArray2D(String name, float[][] defVal) throws IOException {
-    if (!rootNode.has(name)) {
+    if (!currentNode.has(name)) {
       return defVal;
     }
-    JsonNode arrayNode = rootNode.get(name);
+    JsonNode arrayNode = currentNode.get(name);
     if (arrayNode == null || arrayNode.size() < 1) {
       return defVal;
     }
@@ -228,17 +240,17 @@ public class JsonInputCapsule implements InputCapsule {
   }
 
   public double readDouble(String name, double defVal) throws IOException {
-    if (!rootNode.has(name)) {
+    if (!currentNode.has(name)) {
       return defVal;
     }
-    return rootNode.get(name).asDouble(defVal);
+    return currentNode.get(name).asDouble(defVal);
   }
 
   public double[] readDoubleArray(String name, double[] defVal) throws IOException {
-    if (!rootNode.has(name)) {
+    if (!currentNode.has(name)) {
       return defVal;
     }
-    JsonNode arrayNode = rootNode.get(name);
+    JsonNode arrayNode = currentNode.get(name);
     if (arrayNode == null || arrayNode.size() < 1) {
       return defVal;
     }
@@ -251,10 +263,10 @@ public class JsonInputCapsule implements InputCapsule {
   }
 
   public double[][] readDoubleArray2D(String name, double[][] defVal) throws IOException {
-    if (!rootNode.has(name)) {
+    if (!currentNode.has(name)) {
       return defVal;
     }
-    JsonNode arrayNode = rootNode.get(name);
+    JsonNode arrayNode = currentNode.get(name);
     if (arrayNode == null || arrayNode.size() < 1) {
       return defVal;
     }
@@ -272,17 +284,17 @@ public class JsonInputCapsule implements InputCapsule {
   }
 
   public long readLong(String name, long defVal) throws IOException {
-    if (!rootNode.has(name)) {
+    if (!currentNode.has(name)) {
       return defVal;
     }
-    return rootNode.get(name).asLong(defVal);
+    return currentNode.get(name).asLong(defVal);
   }
 
   public long[] readLongArray(String name, long[] defVal) throws IOException {
-    if (!rootNode.has(name)) {
+    if (!currentNode.has(name)) {
       return defVal;
     }
-    JsonNode arrayNode = rootNode.get(name);
+    JsonNode arrayNode = currentNode.get(name);
     if (arrayNode == null || arrayNode.size() < 1) {
       return defVal;
     }
@@ -294,10 +306,10 @@ public class JsonInputCapsule implements InputCapsule {
   }
 
   public long[][] readLongArray2D(String name, long[][] defVal) throws IOException {
-    if (!rootNode.has(name)) {
+    if (!currentNode.has(name)) {
       return defVal;
     }
-    JsonNode arrayNode = rootNode.get(name);
+    JsonNode arrayNode = currentNode.get(name);
     if (arrayNode == null || arrayNode.size() < 1) {
       return defVal;
     }
@@ -319,10 +331,10 @@ public class JsonInputCapsule implements InputCapsule {
   }
 
   public short[] readShortArray(String name, short[] defVal) throws IOException {
-    if (!rootNode.has(name)) {
+    if (!currentNode.has(name)) {
       return defVal;
     }
-    JsonNode arrayNode = rootNode.get(name);
+    JsonNode arrayNode = currentNode.get(name);
     if (arrayNode == null || arrayNode.size() < 1) {
       return defVal;
     }
@@ -334,10 +346,10 @@ public class JsonInputCapsule implements InputCapsule {
   }
 
   public short[][] readShortArray2D(String name, short[][] defVal) throws IOException {
-    if (!rootNode.has(name)) {
+    if (!currentNode.has(name)) {
       return defVal;
     }
-    JsonNode arrayNode = rootNode.get(name);
+    JsonNode arrayNode = currentNode.get(name);
     if (arrayNode == null || arrayNode.size() < 1) {
       return defVal;
     }
@@ -355,17 +367,17 @@ public class JsonInputCapsule implements InputCapsule {
   }
 
   public boolean readBoolean(String name, boolean defVal) throws IOException {
-    if (!rootNode.has(name)) {
+    if (!currentNode.has(name)) {
       return defVal;
     }
-    return rootNode.get(name).asBoolean(defVal);
+    return currentNode.get(name).asBoolean(defVal);
   }
 
   public boolean[] readBooleanArray(String name, boolean[] defVal) throws IOException {
-    if (!rootNode.has(name)) {
+    if (!currentNode.has(name)) {
       return defVal;
     }
-    JsonNode arrayNode = rootNode.get(name);
+    JsonNode arrayNode = currentNode.get(name);
     if (arrayNode == null || arrayNode.size() < 1) {
       return defVal;
     }
@@ -377,10 +389,10 @@ public class JsonInputCapsule implements InputCapsule {
   }
 
   public boolean[][] readBooleanArray2D(String name, boolean[][] defVal) throws IOException {
-    if (!rootNode.has(name)) {
+    if (!currentNode.has(name)) {
       return defVal;
     }
-    JsonNode arrayNode = rootNode.get(name);
+    JsonNode arrayNode = currentNode.get(name);
     if (arrayNode == null || arrayNode.size() < 1) {
       return defVal;
     }
@@ -398,17 +410,17 @@ public class JsonInputCapsule implements InputCapsule {
   }
 
   public String readString(String name, String defVal) throws IOException {
-    if (!rootNode.has(name)) {
+    if (!currentNode.has(name)) {
       return defVal;
     }
-    return rootNode.get(name).asText(defVal);
+    return currentNode.get(name).asText(defVal);
   }
 
   public String[] readStringArray(String name, String[] defVal) throws IOException {
-    if (!rootNode.has(name)) {
+    if (!currentNode.has(name)) {
       return defVal;
     }
-    JsonNode arrayNode = rootNode.get(name);
+    JsonNode arrayNode = currentNode.get(name);
     if (arrayNode == null || arrayNode.size() < 1) {
       return defVal;
     }
@@ -420,10 +432,10 @@ public class JsonInputCapsule implements InputCapsule {
   }
 
   public String[][] readStringArray2D(String name, String[][] defVal) throws IOException {
-    if (!rootNode.has(name)) {
+    if (!currentNode.has(name)) {
       return defVal;
     }
-    JsonNode arrayNode = rootNode.get(name);
+    JsonNode arrayNode = currentNode.get(name);
     if (arrayNode == null || arrayNode.size() < 1) {
       return defVal;
     }
@@ -441,10 +453,10 @@ public class JsonInputCapsule implements InputCapsule {
   }
 
   public BitSet readBitSet(String name, BitSet defVal) throws IOException {
-    if (!rootNode.has(name)) {
+    if (!currentNode.has(name)) {
       return defVal;
     }
-    JsonNode arrayNode = rootNode.get(name);
+    JsonNode arrayNode = currentNode.get(name);
     if (arrayNode == null || arrayNode.size() < 1) {
       return defVal;
     }
@@ -456,36 +468,28 @@ public class JsonInputCapsule implements InputCapsule {
   }
 
   public Savable readSavable(String name, Savable defVal) throws IOException {
-    Savable ret = defVal;
-    if (name != null && name.equals("")) logger.warn("Reading Savable String with name \"\"?");
-    try {
-      Element tmpEl = null;
-      if (name != null) {
-        tmpEl = findChildElement(currentElem, name);
-        if (tmpEl == null) {
-          return defVal;
-        }
-      } else if (isAtRoot) {
-        tmpEl = doc.getDocumentElement();
-        isAtRoot = false;
-      } else {
-        tmpEl = findFirstChildElement(currentElem);
-      }
-      currentElem = tmpEl;
-      ret = readSavableFromCurrentElem(defVal);
-      if (currentElem.getParentNode() instanceof Element) {
-        currentElem = (Element) currentElem.getParentNode();
-      } else {
-        currentElem = null;
-      }
-    } catch (IOException ioe) {
-      throw ioe;
-    } catch (Exception e) {
-      IOException io = new IOException(e.toString());
-      io.initCause(e);
-      throw io;
+    if (!currentNode.has(name)) {
+      return defVal;
     }
-    return ret;
+    JsonNode previousNode;
+    JsonNode arrayNode = currentNode.get(name);
+    if (arrayNode == null || arrayNode.size() < 1) {
+      return defVal;
+    }
+    String className = arrayNode.get(0).asText();
+    previousNode = currentNode;
+    currentNode = arrayNode.get(1);
+    Savable res = null;
+    try {
+      res = SavableClassUtil.fromName(className, null);
+      res.read(importer);
+    } catch (Exception e) {
+      e.printStackTrace();
+      res = defVal;
+    } finally {
+      currentNode = previousNode;
+      return res;
+    }
   }
 
   private Savable readSavableFromCurrentElem(Savable defVal)
@@ -786,33 +790,31 @@ public class JsonInputCapsule implements InputCapsule {
 
   public Map<String, ? extends Savable> readStringSavableMap(
       String name, Map<String, ? extends Savable> defVal) throws IOException {
-    Map<String, Savable> ret = null;
-    Element tempEl;
-
-    if (name != null) {
-      tempEl = findChildElement(currentElem, name);
-    } else {
-      tempEl = currentElem;
-    }
-    if (tempEl != null) {
-      ret = new HashMap<String, Savable>();
-
-      NodeList nodes = tempEl.getChildNodes();
-      for (int i = 0; i < nodes.getLength(); i++) {
-        Node n = nodes.item(i);
-        if (n instanceof Element && n.getNodeName().equals("MapEntry")) {
-          Element elem = (Element) n;
-          currentElem = elem;
-          String key = currentElem.getAttribute("key");
-          Savable val = readSavable("Savable", null);
-          ret.put(key, val);
-        }
-      }
-    } else {
+    if (!currentNode.has(name)) {
       return defVal;
     }
-    currentElem = (Element) tempEl.getParentNode();
-    return ret;
+
+    JsonNode previousNode = currentNode;
+
+    // the whole map object
+    currentNode = currentNode.get(name);
+    if (currentNode == null || currentNode.size() < 1) {
+      currentNode = previousNode;
+      return new HashMap<>();
+    }
+    Map<String, Savable> res = new HashMap<>();
+
+    // each entry in a json map is a field object
+    Iterator<Entry<String, JsonNode>> fields = currentNode.fields();
+    while (fields.hasNext()) {
+      Entry<String, JsonNode> entry = fields.next();
+      // each object is serialize whith an array. The first item is the classname and the second,
+      // the value
+      Savable savable = readSavable(entry.getKey(), null);
+      res.put(entry.getKey(), savable);
+    }
+    currentNode = previousNode;
+    return res;
   }
 
   public IntMap<? extends Savable> readIntSavableMap(String name, IntMap<? extends Savable> defVal)
@@ -1044,9 +1046,12 @@ public class JsonInputCapsule implements InputCapsule {
       throws IOException {
     T ret = defVal;
     try {
-      String eVal = currentElem.getAttribute(name);
-      if (eVal != null && eVal.length() > 0) {
-        ret = Enum.valueOf(enumType, eVal);
+      JsonNode node = currentNode.get(name);
+      if (node != null) {
+        String eVal = node.asText();
+        if (eVal != null && eVal.length() > 0) {
+          ret = Enum.valueOf(enumType, eVal);
+        }
       }
     } catch (Exception e) {
       IOException io = new IOException(e.toString());

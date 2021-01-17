@@ -12,29 +12,23 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.BitSet;
+import java.util.Iterator;
 import java.util.Map;
-import org.w3c.dom.Element;
 
 public class JsonOutputCapsule implements OutputCapsule {
 
   private static final String dataAttributeName = "data";
   private JsonGenerator jsonGenerator;
-  private Element currentElement;
   private JmeExporter exporter;
 
   public JsonOutputCapsule(JsonGenerator jsonGenerator, JmeExporter exporter) {
     this.jsonGenerator = jsonGenerator;
     this.exporter = exporter;
-    currentElement = null;
   }
 
   @Override
   public void write(byte value, String name, byte defVal) throws IOException {
-    if (value == defVal) {
-      return;
-    }
     jsonGenerator.writeStringField(name, String.valueOf(value));
   }
 
@@ -42,6 +36,9 @@ public class JsonOutputCapsule implements OutputCapsule {
   public void write(byte[] value, String name, byte[] defVal) throws IOException {
     if (value == null) {
       value = defVal;
+    }
+    if (value == null) {
+      return;
     }
 
     jsonGenerator.writeStringField(name, Base64.encode(value));
@@ -51,6 +48,9 @@ public class JsonOutputCapsule implements OutputCapsule {
   public void write(byte[][] value, String name, byte[][] defVal) throws IOException {
     if (value == null) {
       value = defVal;
+    }
+    if (value == null) {
+      return;
     }
     jsonGenerator.writeArrayFieldStart(name);
     for (int i = 0; i < value.length; i++) {
@@ -62,14 +62,14 @@ public class JsonOutputCapsule implements OutputCapsule {
 
   @Override
   public void write(int value, String name, int defVal) throws IOException {
-    if (value == defVal) {
-      return;
-    }
     jsonGenerator.writeNumberField(name, value);
   }
 
   @Override
   public void write(int[] value, String name, int[] defVal) throws IOException {
+    if (value == null) {
+      value = defVal;
+    }
     if (value == null) {
       return;
     }
@@ -82,6 +82,9 @@ public class JsonOutputCapsule implements OutputCapsule {
     if (value == null) {
       value = defVal;
     }
+    if (value == null) {
+      return;
+    }
     jsonGenerator.writeArrayFieldStart(name);
     for (int i = 0; i < value.length; i++) {
 
@@ -92,9 +95,6 @@ public class JsonOutputCapsule implements OutputCapsule {
 
   @Override
   public void write(float value, String name, float defVal) throws IOException {
-    if (value == defVal) {
-      return;
-    }
     jsonGenerator.writeNumberField(name, value);
   }
 
@@ -102,6 +102,9 @@ public class JsonOutputCapsule implements OutputCapsule {
   public void write(float[] value, String name, float[] defVal) throws IOException {
     if (value == null) {
       value = defVal;
+    }
+    if (value == null) {
+      return;
     }
     jsonGenerator.writeArrayFieldStart(name);
     for (int i = 0; i < value.length; i++) {
@@ -112,8 +115,12 @@ public class JsonOutputCapsule implements OutputCapsule {
 
   @Override
   public void write(float[][] value, String name, float[][] defVal) throws IOException {
-    if (value == null) return;
-
+    if (value == null) {
+      value = defVal;
+    }
+    if (value == null) {
+      return;
+    }
     jsonGenerator.writeArrayFieldStart(name);
     for (int i = 0; i < value.length; i++) {
       jsonGenerator.writeStartArray();
@@ -127,9 +134,6 @@ public class JsonOutputCapsule implements OutputCapsule {
 
   @Override
   public void write(double value, String name, double defVal) throws IOException {
-    if (value == defVal) {
-      return;
-    }
     jsonGenerator.writeNumberField(name, value);
   }
 
@@ -137,6 +141,9 @@ public class JsonOutputCapsule implements OutputCapsule {
   public void write(double[] value, String name, double[] defVal) throws IOException {
     if (value == null) {
       value = defVal;
+    }
+    if (value == null) {
+      return;
     }
     jsonGenerator.writeArrayFieldStart(name);
     for (int i = 0; i < value.length; i++) {
@@ -147,8 +154,12 @@ public class JsonOutputCapsule implements OutputCapsule {
 
   @Override
   public void write(double[][] value, String name, double[][] defVal) throws IOException {
-    if (value == null) return;
-    if (Arrays.deepEquals(value, defVal)) return;
+    if (value == null) {
+      value = defVal;
+    }
+    if (value == null) {
+      return;
+    }
 
     jsonGenerator.writeArrayFieldStart(name);
     for (int i = 0; i < value.length; i++) {
@@ -159,9 +170,6 @@ public class JsonOutputCapsule implements OutputCapsule {
 
   @Override
   public void write(long value, String name, long defVal) throws IOException {
-    if (value == defVal) {
-      return;
-    }
     jsonGenerator.writeNumberField(name, value);
   }
 
@@ -169,6 +177,9 @@ public class JsonOutputCapsule implements OutputCapsule {
   public void write(long[] value, String name, long[] defVal) throws IOException {
     if (value == null) {
       value = defVal;
+    }
+    if (value == null) {
+      return;
     }
     jsonGenerator.writeArrayFieldStart(name);
     for (int i = 0; i < value.length; i++) {
@@ -179,7 +190,12 @@ public class JsonOutputCapsule implements OutputCapsule {
 
   @Override
   public void write(long[][] value, String name, long[][] defVal) throws IOException {
-    if (value == null) return;
+    if (value == null) {
+      value = defVal;
+    }
+    if (value == null) {
+      return;
+    }
     jsonGenerator.writeArrayFieldStart(name);
     for (int i = 0; i < value.length; i++) {
       jsonGenerator.writeArray(value[i], 0, value[i].length);
@@ -189,9 +205,6 @@ public class JsonOutputCapsule implements OutputCapsule {
 
   @Override
   public void write(short value, String name, short defVal) throws IOException {
-    if (value == defVal) {
-      return;
-    }
     jsonGenerator.writeNumberField(name, value);
   }
 
@@ -199,6 +212,9 @@ public class JsonOutputCapsule implements OutputCapsule {
   public void write(short[] value, String name, short[] defVal) throws IOException {
     if (value == null) {
       value = defVal;
+    }
+    if (value == null) {
+      return;
     }
     jsonGenerator.writeArrayFieldStart(name);
     for (int i = 0; i < value.length; i++) {
@@ -209,8 +225,12 @@ public class JsonOutputCapsule implements OutputCapsule {
 
   @Override
   public void write(short[][] value, String name, short[][] defVal) throws IOException {
-    if (value == null) return;
-
+    if (value == null) {
+      value = defVal;
+    }
+    if (value == null) {
+      return;
+    }
     jsonGenerator.writeArrayFieldStart(name);
     for (int i = 0; i < value.length; i++) {
       jsonGenerator.writeStartArray();
@@ -224,9 +244,6 @@ public class JsonOutputCapsule implements OutputCapsule {
 
   @Override
   public void write(boolean value, String name, boolean defVal) throws IOException {
-    if (value == defVal) {
-      return;
-    }
     jsonGenerator.writeBooleanField(name, value);
   }
 
@@ -234,6 +251,9 @@ public class JsonOutputCapsule implements OutputCapsule {
   public void write(boolean[] value, String name, boolean[] defVal) throws IOException {
     if (value == null) {
       value = defVal;
+    }
+    if (value == null) {
+      return;
     }
     jsonGenerator.writeArrayFieldStart(name);
     for (int i = 0; i < value.length; i++) {
@@ -244,9 +264,12 @@ public class JsonOutputCapsule implements OutputCapsule {
 
   @Override
   public void write(boolean[][] value, String name, boolean[][] defVal) throws IOException {
-    if (value == null) return;
-    if (Arrays.deepEquals(value, defVal)) return;
-
+    if (value == null) {
+      value = defVal;
+    }
+    if (value == null) {
+      return;
+    }
     jsonGenerator.writeArrayFieldStart(name);
     for (int i = 0; i < value.length; i++) {
       jsonGenerator.writeStartArray();
@@ -260,7 +283,10 @@ public class JsonOutputCapsule implements OutputCapsule {
 
   @Override
   public void write(String value, String name, String defVal) throws IOException {
-    if (value == null || value.equals(defVal)) {
+    if (value == null) {
+      value = defVal;
+    }
+    if (value == null) {
       return;
     }
     jsonGenerator.writeStringField(name, value);
@@ -271,6 +297,9 @@ public class JsonOutputCapsule implements OutputCapsule {
     if (value == null) {
       value = defVal;
     }
+    if (value == null) {
+      return;
+    }
     jsonGenerator.writeArrayFieldStart(name);
     for (int i = 0; i < value.length; i++) {
       jsonGenerator.writeString(value[i]);
@@ -280,8 +309,12 @@ public class JsonOutputCapsule implements OutputCapsule {
 
   @Override
   public void write(String[][] value, String name, String[][] defVal) throws IOException {
-    if (value == null) return;
-    if (Arrays.deepEquals(value, defVal)) return;
+    if (value == null) {
+      value = defVal;
+    }
+    if (value == null) {
+      return;
+    }
 
     jsonGenerator.writeArrayFieldStart(name);
     for (int i = 0; i < value.length; i++) {
@@ -292,7 +325,10 @@ public class JsonOutputCapsule implements OutputCapsule {
 
   @Override
   public void write(BitSet value, String name, BitSet defVal) throws IOException {
-    if (value == null || value.equals(defVal)) {
+    if (value == null) {
+      value = defVal;
+    }
+    if (value == null) {
       return;
     }
     jsonGenerator.writeArrayFieldStart(name);
@@ -305,19 +341,14 @@ public class JsonOutputCapsule implements OutputCapsule {
   @Override
   public void write(Savable object, String name, Savable defVal) throws IOException {
     if (object == null) {
-      return;
+      object = defVal;
     }
-    if (object.equals(defVal)) {
+    if (object == null) {
       return;
-    }
-
-    String className = null;
-    if (!object.getClass().getName().equals(name)) {
-      className = object.getClass().getName();
     }
     jsonGenerator.writeFieldName(name);
     jsonGenerator.writeStartArray();
-    jsonGenerator.writeString(className);
+    jsonGenerator.writeString(object.getClass().getName());
     jsonGenerator.writeStartObject();
     object.write(exporter);
     jsonGenerator.writeEndObject();
@@ -327,9 +358,9 @@ public class JsonOutputCapsule implements OutputCapsule {
   @Override
   public void write(Savable[] objects, String name, Savable[] defVal) throws IOException {
     if (objects == null) {
-      return;
+      objects = defVal;
     }
-    if (Arrays.equals(objects, defVal)) {
+    if (objects == null) {
       return;
     }
 
@@ -348,8 +379,12 @@ public class JsonOutputCapsule implements OutputCapsule {
 
   @Override
   public void write(Savable[][] value, String name, Savable[][] defVal) throws IOException {
-    if (value == null) return;
-    if (Arrays.deepEquals(value, defVal)) return;
+    if (value == null) {
+      value = defVal;
+    }
+    if (value == null) {
+      return;
+    }
 
     jsonGenerator.writeFieldName(name);
     jsonGenerator.writeStartArray();
@@ -372,9 +407,9 @@ public class JsonOutputCapsule implements OutputCapsule {
   public void writeSavableArrayList(ArrayList array, String name, ArrayList defVal)
       throws IOException {
     if (array == null) {
-      return;
+      array = defVal;
     }
-    if (array.equals(defVal)) {
+    if (array == null) {
       return;
     }
     jsonGenerator.writeFieldName(name);
@@ -396,9 +431,9 @@ public class JsonOutputCapsule implements OutputCapsule {
   public void writeSavableArrayListArray(ArrayList[] objects, String name, ArrayList[] defVal)
       throws IOException {
     if (objects == null) {
-      return;
+      objects = defVal;
     }
-    if (Arrays.equals(objects, defVal)) {
+    if (objects == null) {
       return;
     }
 
@@ -425,8 +460,12 @@ public class JsonOutputCapsule implements OutputCapsule {
   @Override
   public void writeSavableArrayListArray2D(ArrayList[][] value, String name, ArrayList[][] defVal)
       throws IOException {
-    if (value == null) return;
-    if (Arrays.deepEquals(value, defVal)) return;
+    if (value == null) {
+      value = defVal;
+    }
+    if (value == null) {
+      return;
+    }
     /*
        Element el = appendElement(name);
        int size = value.length;
@@ -445,9 +484,9 @@ public class JsonOutputCapsule implements OutputCapsule {
   public void writeFloatBufferArrayList(
       ArrayList<FloatBuffer> array, String name, ArrayList<FloatBuffer> defVal) throws IOException {
     if (array == null) {
-      return;
+      array = defVal;
     }
-    if (array.equals(defVal)) {
+    if (array == null) {
       return;
     }
     /*
@@ -468,11 +507,12 @@ public class JsonOutputCapsule implements OutputCapsule {
       Map<? extends Savable, ? extends Savable> defVal)
       throws IOException {
     if (map == null) {
+      map = defVal;
+    }
+    if (map == null) {
       return;
     }
-    if (map.equals(defVal)) {
-      return;
-    }
+
     /*
     Element stringMap = appendElement(name);
 
@@ -496,27 +536,18 @@ public class JsonOutputCapsule implements OutputCapsule {
       Map<String, ? extends Savable> map, String name, Map<String, ? extends Savable> defVal)
       throws IOException {
     if (map == null) {
+      map = defVal;
+    }
+    if (map == null) {
       return;
     }
-    if (map.equals(defVal)) {
-      return;
-    }
-    /*
-    Element stringMap = appendElement(name);
-
+    jsonGenerator.writeObjectFieldStart(name);
     Iterator<String> keyIterator = map.keySet().iterator();
     while (keyIterator.hasNext()) {
       String key = keyIterator.next();
-      Element mapEntry = appendElement("MapEntry");
-      mapEntry.setAttribute("key", key);
-      Savable s = map.get(key);
-      write(s, "Savable", null);
-      currentElement = stringMap;
+      write(map.get(key), key, null);
     }
-
-    currentElement = (Element) stringMap.getParentNode();
-
-     */
+    jsonGenerator.writeEndObject();
   }
 
   @Override
@@ -524,11 +555,12 @@ public class JsonOutputCapsule implements OutputCapsule {
       IntMap<? extends Savable> map, String name, IntMap<? extends Savable> defVal)
       throws IOException {
     if (map == null) {
+      map = defVal;
+    }
+    if (map == null) {
       return;
     }
-    if (map.equals(defVal)) {
-      return;
-    }
+
     jsonGenerator.writeFieldName(name);
     /*
        for (Entry<? extends Savable> entry : map) {
@@ -546,6 +578,9 @@ public class JsonOutputCapsule implements OutputCapsule {
 
   @Override
   public void write(FloatBuffer value, String name, FloatBuffer defVal) throws IOException {
+    if (value == null) {
+      value = defVal;
+    }
     if (value == null) {
       return;
     }
@@ -583,9 +618,9 @@ public class JsonOutputCapsule implements OutputCapsule {
   @Override
   public void write(IntBuffer value, String name, IntBuffer defVal) throws IOException {
     if (value == null) {
-      return;
+      value = defVal;
     }
-    if (value.equals(defVal)) {
+    if (value == null) {
       return;
     }
 
@@ -621,8 +656,12 @@ public class JsonOutputCapsule implements OutputCapsule {
 
   @Override
   public void write(ByteBuffer value, String name, ByteBuffer defVal) throws IOException {
-    if (value == null) return;
-    if (value.equals(defVal)) return;
+    if (value == null) {
+      value = defVal;
+    }
+    if (value == null) {
+      return;
+    }
 
     jsonGenerator.writeFieldName(name);
     jsonGenerator.writeNumberField("size", value.limit());
@@ -657,9 +696,9 @@ public class JsonOutputCapsule implements OutputCapsule {
   @Override
   public void write(ShortBuffer value, String name, ShortBuffer defVal) throws IOException {
     if (value == null) {
-      return;
+      value = defVal;
     }
-    if (value.equals(defVal)) {
+    if (value == null) {
       return;
     }
 
@@ -695,7 +734,10 @@ public class JsonOutputCapsule implements OutputCapsule {
 
   @Override
   public void write(Enum value, String name, Enum defVal) throws IOException {
-    if (value == defVal) {
+    if (value == null) {
+      value = defVal;
+    }
+    if (value == null) {
       return;
     }
     jsonGenerator.writeStringField(name, String.valueOf(value));
@@ -705,9 +747,9 @@ public class JsonOutputCapsule implements OutputCapsule {
   public void writeByteBufferArrayList(
       ArrayList<ByteBuffer> array, String name, ArrayList<ByteBuffer> defVal) throws IOException {
     if (array == null) {
-      return;
+      array = defVal;
     }
-    if (array.equals(defVal)) {
+    if (array == null) {
       return;
     }
     jsonGenerator.writeFieldName(name);

@@ -43,6 +43,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringWriter;
+import java.io.Writer;
 
 /**
  * A Json serialisation exporter which can take advantage of the existing serialization methods
@@ -64,8 +65,23 @@ public class JsonExporter implements JmeExporter {
     jsonOutputCapsule = new JsonOutputCapsule(jsonGenerator, this);
   }
 
+  public JsonExporter(JsonGenerator jsonGenerator, JsonOutputCapsule jsonOutputCapsule) {
+    this.jsonGenerator = jsonGenerator;
+    this.jsonOutputCapsule = jsonOutputCapsule;
+  }
+
   public JsonExporter(JsonGenerator jsonGenerator) {
     this.jsonGenerator = jsonGenerator;
+    jsonOutputCapsule = new JsonOutputCapsule(jsonGenerator, this);
+  }
+
+  public JsonExporter(OutputStream stream) throws IOException {
+    jsonGenerator = new JsonFactory().createGenerator(stream);
+    jsonOutputCapsule = new JsonOutputCapsule(jsonGenerator, this);
+  }
+
+  public JsonExporter(Writer writer) throws IOException {
+    jsonGenerator = new JsonFactory().createGenerator(writer);
     jsonOutputCapsule = new JsonOutputCapsule(jsonGenerator, this);
   }
 
@@ -103,8 +119,7 @@ public class JsonExporter implements JmeExporter {
     return jsonOutputCapsule;
   }
 
-  public void setJsonOutputCapsule(
-      JsonOutputCapsule jsonOutputCapsule) {
+  public void setJsonOutputCapsule(JsonOutputCapsule jsonOutputCapsule) {
     this.jsonOutputCapsule = jsonOutputCapsule;
   }
 

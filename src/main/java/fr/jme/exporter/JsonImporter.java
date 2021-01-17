@@ -2,9 +2,13 @@ package fr.jme.exporter;
 
 import com.jme3.asset.AssetInfo;
 import com.jme3.asset.AssetManager;
+import com.jme3.asset.DesktopAssetManager;
+import com.jme3.asset.plugins.ClasspathLocator;
+import com.jme3.asset.plugins.FileLocator;
 import com.jme3.export.InputCapsule;
 import com.jme3.export.JmeImporter;
 import com.jme3.export.Savable;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -19,15 +23,29 @@ public class JsonImporter implements JmeImporter {
   public JsonImporter() {
   }
 
+  public JsonImporter(JsonInputCapsule jsonInputCapsule) {
+    this.jsonInputCapsule = jsonInputCapsule;
+  }
+
+  public JsonImporter(InputStream inputStream) throws IOException {
+    this.jsonInputCapsule = new JsonInputCapsule(inputStream, this);
+  }
+
+  public JsonImporter(InputStream inputStream, DesktopAssetManager desktopAssetManager)
+      throws IOException {
+    this.jsonInputCapsule = new JsonInputCapsule(inputStream, this);
+    this.assetManager = desktopAssetManager;
+  }
+
   public int getFormatVersion() {
     return formatVersion;
   }
 
-  public AssetManager getAssetManager(){
+  public AssetManager getAssetManager() {
     return assetManager;
   }
 
-  public void setAssetManager(AssetManager assetManager){
+  public void setAssetManager(AssetManager assetManager) {
     this.assetManager = assetManager;
   }
 
@@ -37,8 +55,7 @@ public class JsonImporter implements JmeImporter {
     try {
       return load(in);
     } finally {
-      if (in != null)
-        in.close();
+      if (in != null) in.close();
     }
   }
 
@@ -54,9 +71,9 @@ public class JsonImporter implements JmeImporter {
   }
 
   public Savable load(InputStream f) throws IOException {
-      //
-      jsonInputCapsule = new JsonInputCapsule(f, this);
-      return jsonInputCapsule.readSavable(null, null);
+    //
+    jsonInputCapsule = new JsonInputCapsule(f, this);
+    return jsonInputCapsule.readSavable(null, null);
   }
 
   public InputCapsule getCapsule(Savable id) {
@@ -66,5 +83,4 @@ public class JsonImporter implements JmeImporter {
   public static JsonImporter getInstance() {
     return new JsonImporter();
   }
-
 }

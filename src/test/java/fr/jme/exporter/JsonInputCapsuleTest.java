@@ -1,11 +1,23 @@
 package fr.jme.exporter;
 
+import com.jme3.asset.AssetKey;
+import com.jme3.asset.DesktopAssetManager;
+import com.jme3.export.Savable;
+import com.jme3.light.LightProbe;
+import com.jme3.material.Material;
+import com.jme3.material.MaterialDef;
+import com.jme3.material.RenderState.BlendEquation;
+import com.jme3.material.RenderState.BlendEquationAlpha;
+import com.jme3.material.RenderState.BlendMode;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.mockito.Spy;
 
 class JsonInputCapsuleTest {
 
@@ -327,7 +339,23 @@ class JsonInputCapsuleTest {
   }
 
   @Test
-  void readSavable() {}
+  void readSavable() throws IOException {
+    String json =
+        "{\"myField\":[\"com.jme3.material.Material\",{\"material_def\":\"assetName\",\"render_state\":[\"com.jme3.material.RenderState\",{\"pointSprite\":true,\"wireframe\":false,\"cullMode\":\"Back\",\"depthWrite\":true,\"depthTest\":true,\"colorWrite\":true,\"blendMode\":\"Additive\",\"offsetEnabled\":false,\"offsetFactor\":0.0,\"offsetUnits\":0.0,\"stencilTest\":false,\"frontStencilStencilFailOperation\":\"Keep\",\"frontStencilDepthFailOperation\":\"Keep\",\"frontStencilDepthPassOperation\":\"Keep\",\"frontStencilStencilFailOperation\":\"Keep\",\"backStencilDepthFailOperation\":\"Keep\",\"backStencilDepthPassOperation\":\"Keep\",\"frontStencilFunction\":\"Always\",\"backStencilFunction\":\"Always\",\"blendEquation\":\"Add\",\"blendEquationAlpha\":\"InheritColor\",\"depthFunc\":\"LessOrEqual\",\"lineWidth\":1.0,\"sfactorRGB\":\"One\",\"dfactorRGB\":\"One\",\"sfactorAlpha\":\"One\",\"dfactorAlpha\":\"One\",\"applyWireFrame\":false,\"applyCullMode\":false,\"applyDepthWrite\":false,\"applyDepthTest\":true,\"applyColorWrite\":true,\"applyBlendMode\":true,\"applyPolyOffset\":false,\"applyDepthFunc\":false,\"applyLineWidth\":false}],\"is_transparent\":false,\"parameters\":{}}]}";
+    TEST_MAT_DEF.setAssetName("assetName");
+    Material value = new Material(TEST_MAT_DEF);
+    value.getAdditionalRenderState().setBlendEquation(BlendEquation.Add);
+    value.getAdditionalRenderState().setColorWrite(true);
+    value.getAdditionalRenderState().setBlendEquationAlpha(BlendEquationAlpha.InheritColor);
+    value.getAdditionalRenderState().setDepthTest(true);
+    value.getAdditionalRenderState().setBlendMode(BlendMode.Additive);
+    Mockito.doReturn(TEST_MAT_DEF).when(TEST_ASSET_MANAGER).loadAsset(Mockito.any(
+        AssetKey.class));
+    JsonImporter importer = new JsonImporter(new ByteArrayInputStream(json.getBytes()), TEST_ASSET_MANAGER);
+    JsonInputCapsule jsonInputCapsule = (JsonInputCapsule) importer.getCapsule(null);
+    Material res = (Material) jsonInputCapsule.readSavable("myField", null);
+    Assertions.assertTrue(value.contentEquals(res));
+  }
 
   @Test
   void readSavableArray() {}
@@ -350,8 +378,31 @@ class JsonInputCapsuleTest {
   @Test
   void readSavableMap() {}
 
+public static final DesktopAssetManager TEST_ASSET_MANAGER = Mockito.spy(new DesktopAssetManager());
+public static final MaterialDef TEST_MAT_DEF = new MaterialDef(TEST_ASSET_MANAGER, "matDefName");
   @Test
-  void readStringSavableMap() {}
+  void readStringSavableMap() throws IOException {
+    String json =
+        " {\"myField\":{\"key1\":[\"com.jme3.material.Material\",{\"material_def\":\"assetName\",\"render_state\":[\"com.jme3.material.RenderState\",{\"pointSprite\":true,\"wireframe\":false,\"cullMode\":\"Back\",\"depthWrite\":true,\"depthTest\":true,\"colorWrite\":true,\"blendMode\":\"Additive\",\"offsetEnabled\":false,\"offsetFactor\":0.0,\"offsetUnits\":0.0,\"stencilTest\":false,\"frontStencilStencilFailOperation\":\"Keep\",\"frontStencilDepthFailOperation\":\"Keep\",\"frontStencilDepthPassOperation\":\"Keep\",\"frontStencilStencilFailOperation\":\"Keep\",\"backStencilDepthFailOperation\":\"Keep\",\"backStencilDepthPassOperation\":\"Keep\",\"frontStencilFunction\":\"Always\",\"backStencilFunction\":\"Always\",\"blendEquation\":\"Add\",\"blendEquationAlpha\":\"InheritColor\",\"depthFunc\":\"LessOrEqual\",\"lineWidth\":1.0,\"sfactorRGB\":\"One\",\"dfactorRGB\":\"One\",\"sfactorAlpha\":\"One\",\"dfactorAlpha\":\"One\",\"applyWireFrame\":false,\"applyCullMode\":false,\"applyDepthWrite\":false,\"applyDepthTest\":true,\"applyColorWrite\":true,\"applyBlendMode\":true,\"applyPolyOffset\":false,\"applyDepthFunc\":false,\"applyLineWidth\":false}],\"is_transparent\":false,\"parameters\":{}}],\"key2\":[\"com.jme3.light.LightProbe\",{\"color\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"enabled\":true,\"position\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"area\":[\"com.jme3.light.SphereProbeArea\",{\"center\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"radius\":1.0}],\"ready\":false,\"nbMipMaps\":0}]}}";
+    TEST_MAT_DEF.setAssetName("assetName");
+    Material value = new Material(TEST_MAT_DEF);
+    value.getAdditionalRenderState().setBlendEquation(BlendEquation.Add);
+    value.getAdditionalRenderState().setColorWrite(true);
+    value.getAdditionalRenderState().setBlendEquationAlpha(BlendEquationAlpha.InheritColor);
+    value.getAdditionalRenderState().setDepthTest(true);
+    value.getAdditionalRenderState().setBlendMode(BlendMode.Additive);
+    Mockito.doReturn(TEST_MAT_DEF).when(TEST_ASSET_MANAGER).loadAsset(Mockito.any(
+        AssetKey.class));
+    JsonImporter importer = new JsonImporter(new ByteArrayInputStream(json.getBytes()), TEST_ASSET_MANAGER);
+    JsonInputCapsule jsonInputCapsule = (JsonInputCapsule) importer.getCapsule(null);
+    Map<String, ? extends Savable> res = jsonInputCapsule
+        .readStringSavableMap("myField", null);
+    Assertions.assertEquals(2, res.size());
+    Assertions.assertTrue(res.containsKey("key1"));
+    Assertions.assertTrue(value.contentEquals(res.get("key1")));
+    Assertions.assertTrue(res.containsKey("key2"));
+    Assertions.assertTrue(LightProbe.class.isInstance(res.get("key2")));
+  }
 
   @Test
   void readIntSavableMap() {}
