@@ -819,33 +819,31 @@ public class JsonInputCapsule implements InputCapsule {
 
   public IntMap<? extends Savable> readIntSavableMap(String name, IntMap<? extends Savable> defVal)
       throws IOException {
-    IntMap<Savable> ret = null;
-    Element tempEl;
-
-    if (name != null) {
-      tempEl = findChildElement(currentElem, name);
-    } else {
-      tempEl = currentElem;
-    }
-    if (tempEl != null) {
-      ret = new IntMap<Savable>();
-
-      NodeList nodes = tempEl.getChildNodes();
-      for (int i = 0; i < nodes.getLength(); i++) {
-        Node n = nodes.item(i);
-        if (n instanceof Element && n.getNodeName().equals("MapEntry")) {
-          Element elem = (Element) n;
-          currentElem = elem;
-          int key = Integer.parseInt(currentElem.getAttribute("key"));
-          Savable val = readSavable("Savable", null);
-          ret.put(key, val);
-        }
-      }
-    } else {
+    if (!currentNode.has(name)) {
       return defVal;
     }
-    currentElem = (Element) tempEl.getParentNode();
-    return ret;
+
+    JsonNode previousNode = currentNode;
+
+    // the whole map object
+    currentNode = currentNode.get(name);
+    if (currentNode == null || currentNode.size() < 1) {
+      currentNode = previousNode;
+      return new IntMap<>();
+    }
+    IntMap<Savable> res = new IntMap<>();
+
+    // each entry in a json map is a field object
+    Iterator<Entry<String, JsonNode>> fields = currentNode.fields();
+    while (fields.hasNext()) {
+      Entry<String, JsonNode> entry = fields.next();
+      // each object is serialize whith an array. The first item is the classname and the second,
+      // the value
+      Savable savable = readSavable(entry.getKey(), null);
+      res.put(Integer.parseInt(entry.getKey()), savable);
+    }
+    currentNode = previousNode;
+    return res;
   }
 
   /** reads from currentElem if name is null */

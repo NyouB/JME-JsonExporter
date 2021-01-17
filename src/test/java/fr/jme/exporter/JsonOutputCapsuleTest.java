@@ -12,6 +12,7 @@ import com.jme3.material.RenderState;
 import com.jme3.material.RenderState.BlendEquation;
 import com.jme3.material.RenderState.BlendEquationAlpha;
 import com.jme3.material.RenderState.BlendMode;
+import com.jme3.util.IntMap;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.BitSet;
@@ -368,13 +369,10 @@ class JsonOutputCapsuleTest {
   }
 
   @org.junit.jupiter.api.Test
-  void testWrite24() {}
+  void writeSavableArray() {}
 
   @org.junit.jupiter.api.Test
-  void testWrite25() {}
-
-  @org.junit.jupiter.api.Test
-  void testWrite26() {}
+  void writeSavableArray2D() {}
 
   @org.junit.jupiter.api.Test
   void writeSavableArrayList() {}
@@ -417,23 +415,44 @@ class JsonOutputCapsuleTest {
   }
 
   @org.junit.jupiter.api.Test
-  void writeIntSavableMap() {}
+  void writeIntSavableMap() throws IOException {
+    MaterialDef materialDef = new MaterialDef(new DesktopAssetManager(), "matDefName");
+    materialDef.setAssetName("assetName");
+    Material value = new Material(materialDef);
+    value.getAdditionalRenderState().setBlendEquation(BlendEquation.Add);
+    value.getAdditionalRenderState().setColorWrite(true);
+    value.getAdditionalRenderState().setBlendEquationAlpha(BlendEquationAlpha.InheritColor);
+    value.getAdditionalRenderState().setDepthTest(true);
+    value.getAdditionalRenderState().setBlendMode(BlendMode.Additive);
+
+    IntMap<Savable> savableMap = new IntMap<>();
+    savableMap.put(1, value);
+    savableMap.put(12, new LightProbe());
+    jGenerator.writeStartObject();
+    jsonOutputCapsule.writeIntSavableMap(savableMap, "myField", new IntMap<>());
+    jGenerator.writeEndObject();
+    jGenerator.close();
+    System.out.println(stringWriter.toString());
+    Assertions.assertEquals(
+        "{\"myField\":{\"1\":[\"com.jme3.material.Material\",{\"material_def\":\"assetName\",\"render_state\":[\"com.jme3.material.RenderState\",{\"pointSprite\":true,\"wireframe\":false,\"cullMode\":\"Back\",\"depthWrite\":true,\"depthTest\":true,\"colorWrite\":true,\"blendMode\":\"Additive\",\"offsetEnabled\":false,\"offsetFactor\":0.0,\"offsetUnits\":0.0,\"stencilTest\":false,\"frontStencilStencilFailOperation\":\"Keep\",\"frontStencilDepthFailOperation\":\"Keep\",\"frontStencilDepthPassOperation\":\"Keep\",\"frontStencilStencilFailOperation\":\"Keep\",\"backStencilDepthFailOperation\":\"Keep\",\"backStencilDepthPassOperation\":\"Keep\",\"frontStencilFunction\":\"Always\",\"backStencilFunction\":\"Always\",\"blendEquation\":\"Add\",\"blendEquationAlpha\":\"InheritColor\",\"depthFunc\":\"LessOrEqual\",\"lineWidth\":1.0,\"sfactorRGB\":\"One\",\"dfactorRGB\":\"One\",\"sfactorAlpha\":\"One\",\"dfactorAlpha\":\"One\",\"applyWireFrame\":false,\"applyCullMode\":false,\"applyDepthWrite\":false,\"applyDepthTest\":true,\"applyColorWrite\":true,\"applyBlendMode\":true,\"applyPolyOffset\":false,\"applyDepthFunc\":false,\"applyLineWidth\":false}],\"is_transparent\":false,\"parameters\":{}}],\"12\":[\"com.jme3.light.LightProbe\",{\"color\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"enabled\":true,\"position\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"area\":[\"com.jme3.light.SphereProbeArea\",{\"center\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"radius\":1.0}],\"ready\":false,\"nbMipMaps\":0}]}}",
+        stringWriter.toString());
+  }
 
   @org.junit.jupiter.api.Test
-  void testWrite27() {}
+  void writeFloatBuffer() {}
 
   @org.junit.jupiter.api.Test
-  void testWrite28() {}
+  void writeIntBuffer() {}
 
   @org.junit.jupiter.api.Test
-  void testWrite29() {}
+  void writeByteBuffer() {}
 
   @org.junit.jupiter.api.Test
-  void testWrite30() {}
-
-  @org.junit.jupiter.api.Test
-  void testWrite31() {}
+  void writeShortBuffer() {}
 
   @org.junit.jupiter.api.Test
   void writeByteBufferArrayList() {}
+
+  @org.junit.jupiter.api.Test
+  void writeEnum() {}
 }

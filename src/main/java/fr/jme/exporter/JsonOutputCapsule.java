@@ -5,6 +5,7 @@ import com.jme3.export.JmeExporter;
 import com.jme3.export.OutputCapsule;
 import com.jme3.export.Savable;
 import com.jme3.util.IntMap;
+import com.jme3.util.IntMap.Entry;
 import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -560,19 +561,14 @@ public class JsonOutputCapsule implements OutputCapsule {
     if (map == null) {
       return;
     }
-
-    jsonGenerator.writeFieldName(name);
-    /*
-       for (Entry<? extends Savable> entry : map) {
-         int key = entry.getKey();
-
-         Element mapEntry = appendElement("MapEntry");
-         mapEntry.setAttribute("key", Integer.toString(key));
-         Savable s = entry.getValue();
-         write(s, "Savable", null);
-       }
-
-    */
+    jsonGenerator.writeObjectFieldStart(name);
+    Iterator<? extends Entry<? extends Savable>> entryIterator = map.iterator();
+    while (entryIterator.hasNext()) {
+      Entry<? extends Savable> entry = entryIterator.next();
+      int key = entry.getKey();
+      write(entry.getValue(), Integer.toString(key), null);
+    }
+    jsonGenerator.writeEndObject();
 
   }
 

@@ -9,6 +9,7 @@ import com.jme3.material.MaterialDef;
 import com.jme3.material.RenderState.BlendEquation;
 import com.jme3.material.RenderState.BlendEquationAlpha;
 import com.jme3.material.RenderState.BlendMode;
+import com.jme3.util.IntMap;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Arrays;
@@ -405,7 +406,28 @@ public static final MaterialDef TEST_MAT_DEF = new MaterialDef(TEST_ASSET_MANAGE
   }
 
   @Test
-  void readIntSavableMap() {}
+  void readIntSavableMap() throws IOException {
+    String json =
+        " {\"myField\":{\"1\":[\"com.jme3.material.Material\",{\"material_def\":\"assetName\",\"render_state\":[\"com.jme3.material.RenderState\",{\"pointSprite\":true,\"wireframe\":false,\"cullMode\":\"Back\",\"depthWrite\":true,\"depthTest\":true,\"colorWrite\":true,\"blendMode\":\"Additive\",\"offsetEnabled\":false,\"offsetFactor\":0.0,\"offsetUnits\":0.0,\"stencilTest\":false,\"frontStencilStencilFailOperation\":\"Keep\",\"frontStencilDepthFailOperation\":\"Keep\",\"frontStencilDepthPassOperation\":\"Keep\",\"frontStencilStencilFailOperation\":\"Keep\",\"backStencilDepthFailOperation\":\"Keep\",\"backStencilDepthPassOperation\":\"Keep\",\"frontStencilFunction\":\"Always\",\"backStencilFunction\":\"Always\",\"blendEquation\":\"Add\",\"blendEquationAlpha\":\"InheritColor\",\"depthFunc\":\"LessOrEqual\",\"lineWidth\":1.0,\"sfactorRGB\":\"One\",\"dfactorRGB\":\"One\",\"sfactorAlpha\":\"One\",\"dfactorAlpha\":\"One\",\"applyWireFrame\":false,\"applyCullMode\":false,\"applyDepthWrite\":false,\"applyDepthTest\":true,\"applyColorWrite\":true,\"applyBlendMode\":true,\"applyPolyOffset\":false,\"applyDepthFunc\":false,\"applyLineWidth\":false}],\"is_transparent\":false,\"parameters\":{}}],\"12\":[\"com.jme3.light.LightProbe\",{\"color\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"enabled\":true,\"position\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"area\":[\"com.jme3.light.SphereProbeArea\",{\"center\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"radius\":1.0}],\"ready\":false,\"nbMipMaps\":0}]}}";
+    TEST_MAT_DEF.setAssetName("assetName");
+    Material value = new Material(TEST_MAT_DEF);
+    value.getAdditionalRenderState().setBlendEquation(BlendEquation.Add);
+    value.getAdditionalRenderState().setColorWrite(true);
+    value.getAdditionalRenderState().setBlendEquationAlpha(BlendEquationAlpha.InheritColor);
+    value.getAdditionalRenderState().setDepthTest(true);
+    value.getAdditionalRenderState().setBlendMode(BlendMode.Additive);
+    Mockito.doReturn(TEST_MAT_DEF).when(TEST_ASSET_MANAGER).loadAsset(Mockito.any(
+        AssetKey.class));
+    JsonImporter importer = new JsonImporter(new ByteArrayInputStream(json.getBytes()), TEST_ASSET_MANAGER);
+    JsonInputCapsule jsonInputCapsule = (JsonInputCapsule) importer.getCapsule(null);
+    IntMap<? extends Savable> res = jsonInputCapsule
+        .readIntSavableMap("myField", null);
+    Assertions.assertEquals(2, res.size());
+    Assertions.assertTrue(res.containsKey(1));
+    Assertions.assertTrue(value.contentEquals(res.get(1)));
+    Assertions.assertTrue(res.containsKey(12));
+    Assertions.assertTrue(LightProbe.class.isInstance(res.get(12)));
+  }
 
   @Test
   void readFloatBuffer() {}
