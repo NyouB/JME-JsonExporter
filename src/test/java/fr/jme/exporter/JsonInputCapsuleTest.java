@@ -9,6 +9,7 @@ import com.jme3.material.MaterialDef;
 import com.jme3.material.RenderState.BlendEquation;
 import com.jme3.material.RenderState.BlendEquationAlpha;
 import com.jme3.material.RenderState.BlendMode;
+import com.jme3.material.RenderState.TestFunction;
 import com.jme3.util.IntMap;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -18,7 +19,6 @@ import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.mockito.Spy;
 
 class JsonInputCapsuleTest {
 
@@ -223,40 +223,17 @@ class JsonInputCapsuleTest {
     Assertions.assertEquals(2f, jsonInputCapsule.readShort("doestnotexists", (short) 2));
   }
 
-  @Test
-  void readShortArray() throws IOException {
-    String json = "{\"myField\":[1,2,3,4,5,6,7,8]}";
-    short[] expected = new short[] {1, 2, 3, 4, 5, 6, 7, 8};
-    JsonInputCapsule jsonInputCapsule =
-        new JsonInputCapsule(new ByteArrayInputStream(json.getBytes()), new JsonImporter());
-    short[] res = jsonInputCapsule.readShortArray("myField", null);
-    Assertions.assertTrue(Arrays.equals(expected, res));
-    Assertions.assertTrue(
-        Arrays.equals(
-            new short[] {1, 3},
-            jsonInputCapsule.readShortArray("doestnotexists", new short[] {1, 3})));
-  }
-
-  @Test
-  void readShortArray2D() throws IOException {
-    String json = "{\"myField\":[[1,2,3,4],[1,2,3,4],[1,2,3,4]]}";
-    short[][] expected =
-        new short[][] {new short[] {1, 2, 3, 4}, new short[] {1, 2, 3, 4}, new short[] {1, 2, 3, 4}};
-    JsonInputCapsule jsonInputCapsule =
-        new JsonInputCapsule(new ByteArrayInputStream(json.getBytes()), new JsonImporter());
-    short[][] res = jsonInputCapsule.readShortArray2D("myField", null);
-    for (int i = 0; i < res.length; i++) {
-      Assertions.assertTrue(Arrays.equals(expected[i], res[i]));
-    }
-  }
+  public static final DesktopAssetManager TEST_ASSET_MANAGER =
+      Mockito.spy(new DesktopAssetManager());
+  public static final MaterialDef TEST_MAT_DEF = new MaterialDef(TEST_ASSET_MANAGER, "matDefName");
 
   @Test
   void readBoolean() throws IOException {
     String json = "{\"myField\":true}";
     JsonInputCapsule jsonInputCapsule =
         new JsonInputCapsule(new ByteArrayInputStream(json.getBytes()), new JsonImporter());
-    Assertions.assertEquals(true, jsonInputCapsule.readBoolean("myField", false));
-    Assertions.assertEquals(false, jsonInputCapsule.readBoolean("doestnotexists", false));
+    Assertions.assertTrue(jsonInputCapsule.readBoolean("myField", false));
+    Assertions.assertFalse(jsonInputCapsule.readBoolean("doestnotexists", false));
   }
 
   @Test
@@ -274,16 +251,17 @@ class JsonInputCapsuleTest {
   }
 
   @Test
-  void readBooleanArray2D() throws IOException {
-    String json = "{\"myField\":[[true,true,false],[true,true,false],[true,true,false]]}";
-    boolean[][] expected =
-        new boolean[][] {new boolean[] {true,true,false}, new boolean[] {true,true,false}, new boolean[] {true,true,false}};
+  void readShortArray() throws IOException {
+    String json = "{\"myField\":[1,2,3,4,5,6,7,8]}";
+    short[] expected = new short[]{1, 2, 3, 4, 5, 6, 7, 8};
     JsonInputCapsule jsonInputCapsule =
         new JsonInputCapsule(new ByteArrayInputStream(json.getBytes()), new JsonImporter());
-    boolean[][] res = jsonInputCapsule.readBooleanArray2D("myField", null);
-    for (int i = 0; i < res.length; i++) {
-      Assertions.assertTrue(Arrays.equals(expected[i], res[i]));
-    }
+    short[] res = jsonInputCapsule.readShortArray("myField", null);
+    Assertions.assertTrue(Arrays.equals(expected, res));
+    Assertions.assertTrue(
+        Arrays.equals(
+            new short[]{1, 3},
+            jsonInputCapsule.readShortArray("doestnotexists", new short[]{1, 3})));
   }
 
   @Test
@@ -305,8 +283,40 @@ class JsonInputCapsuleTest {
     Assertions.assertTrue(Arrays.equals(expected, res));
     Assertions.assertTrue(
         Arrays.equals(
-            new String[] {"value1", "value2"},
-            jsonInputCapsule.readStringArray("doestnotexists", new String[] {"value1", "value2"})));
+            new String[]{"value1", "value2"},
+            jsonInputCapsule.readStringArray("doestnotexists", new String[]{"value1", "value2"})));
+  }
+
+  @Test
+  void readShortArray2D() throws IOException {
+    String json = "{\"myField\":[[1,2,3,4],[1,2,3,4],[1,2,3,4]]}";
+    short[][] expected =
+        new short[][]{
+            new short[]{1, 2, 3, 4}, new short[]{1, 2, 3, 4}, new short[]{1, 2, 3, 4}
+        };
+    JsonInputCapsule jsonInputCapsule =
+        new JsonInputCapsule(new ByteArrayInputStream(json.getBytes()), new JsonImporter());
+    short[][] res = jsonInputCapsule.readShortArray2D("myField", null);
+    for (int i = 0; i < res.length; i++) {
+      Assertions.assertTrue(Arrays.equals(expected[i], res[i]));
+    }
+  }
+
+  @Test
+  void readBooleanArray2D() throws IOException {
+    String json = "{\"myField\":[[true,true,false],[true,true,false],[true,true,false]]}";
+    boolean[][] expected =
+        new boolean[][]{
+            new boolean[]{true, true, false},
+            new boolean[]{true, true, false},
+            new boolean[]{true, true, false}
+        };
+    JsonInputCapsule jsonInputCapsule =
+        new JsonInputCapsule(new ByteArrayInputStream(json.getBytes()), new JsonImporter());
+    boolean[][] res = jsonInputCapsule.readBooleanArray2D("myField", null);
+    for (int i = 0; i < res.length; i++) {
+      Assertions.assertTrue(Arrays.equals(expected[i], res[i]));
+    }
   }
 
   @Test
@@ -314,7 +324,9 @@ class JsonInputCapsuleTest {
     String json =
         "{\"myField\":[[\"value1\",\"value2\",\"value3\"],[\"value1\",\"value2\",\"value3\"]]}";
     String[][] expected =
-        new String[][] {new String[] {"value1", "value2", "value3"}, new String[] {"value1", "value2", "value3"}};
+        new String[][]{
+            new String[]{"value1", "value2", "value3"}, new String[]{"value1", "value2", "value3"}
+        };
     JsonInputCapsule jsonInputCapsule =
         new JsonInputCapsule(new ByteArrayInputStream(json.getBytes()), new JsonImporter());
     String[][] res = jsonInputCapsule.readStringArray2D("myField", null);
@@ -324,8 +336,36 @@ class JsonInputCapsuleTest {
   }
 
   @Test
+  void readSavableArray() {
+  }
+
+  @Test
+  void readSavableArray2D() {
+  }
+
+  @Test
+  void readSavableArrayList() {
+  }
+
+  @Test
+  void readSavableArrayListArray() {
+  }
+
+  @Test
+  void readSavableArrayListArray2D() {
+  }
+
+  @Test
+  void readFloatBufferArrayList() {
+  }
+
+  @Test
+  void readSavableMap() {
+  }
+
+  @Test
   void readBitSet() throws IOException {
-    String json ="{\"myField\":[1,2,4]}";
+    String json = "{\"myField\":[1,2,4]}";
     BitSet expected = new BitSet();
     expected.set(0, false);
     expected.set(1, true);
@@ -336,7 +376,8 @@ class JsonInputCapsuleTest {
         new JsonInputCapsule(new ByteArrayInputStream(json.getBytes()), new JsonImporter());
     BitSet res = jsonInputCapsule.readBitSet("myField", null);
     Assertions.assertEquals(expected, res);
-    Assertions.assertEquals(new BitSet(), jsonInputCapsule.readBitSet("doestnotexists", new BitSet()));
+    Assertions.assertEquals(
+        new BitSet(), jsonInputCapsule.readBitSet("doestnotexists", new BitSet()));
   }
 
   @Test
@@ -350,37 +391,14 @@ class JsonInputCapsuleTest {
     value.getAdditionalRenderState().setBlendEquationAlpha(BlendEquationAlpha.InheritColor);
     value.getAdditionalRenderState().setDepthTest(true);
     value.getAdditionalRenderState().setBlendMode(BlendMode.Additive);
-    Mockito.doReturn(TEST_MAT_DEF).when(TEST_ASSET_MANAGER).loadAsset(Mockito.any(
-        AssetKey.class));
-    JsonImporter importer = new JsonImporter(new ByteArrayInputStream(json.getBytes()), TEST_ASSET_MANAGER);
+    Mockito.doReturn(TEST_MAT_DEF).when(TEST_ASSET_MANAGER).loadAsset(Mockito.any(AssetKey.class));
+    JsonImporter importer =
+        new JsonImporter(new ByteArrayInputStream(json.getBytes()), TEST_ASSET_MANAGER);
     JsonInputCapsule jsonInputCapsule = (JsonInputCapsule) importer.getCapsule(null);
     Material res = (Material) jsonInputCapsule.readSavable("myField", null);
     Assertions.assertTrue(value.contentEquals(res));
   }
 
-  @Test
-  void readSavableArray() {}
-
-  @Test
-  void readSavableArray2D() {}
-
-  @Test
-  void readSavableArrayList() {}
-
-  @Test
-  void readSavableArrayListArray() {}
-
-  @Test
-  void readSavableArrayListArray2D() {}
-
-  @Test
-  void readFloatBufferArrayList() {}
-
-  @Test
-  void readSavableMap() {}
-
-public static final DesktopAssetManager TEST_ASSET_MANAGER = Mockito.spy(new DesktopAssetManager());
-public static final MaterialDef TEST_MAT_DEF = new MaterialDef(TEST_ASSET_MANAGER, "matDefName");
   @Test
   void readStringSavableMap() throws IOException {
     String json =
@@ -392,17 +410,16 @@ public static final MaterialDef TEST_MAT_DEF = new MaterialDef(TEST_ASSET_MANAGE
     value.getAdditionalRenderState().setBlendEquationAlpha(BlendEquationAlpha.InheritColor);
     value.getAdditionalRenderState().setDepthTest(true);
     value.getAdditionalRenderState().setBlendMode(BlendMode.Additive);
-    Mockito.doReturn(TEST_MAT_DEF).when(TEST_ASSET_MANAGER).loadAsset(Mockito.any(
-        AssetKey.class));
-    JsonImporter importer = new JsonImporter(new ByteArrayInputStream(json.getBytes()), TEST_ASSET_MANAGER);
+    Mockito.doReturn(TEST_MAT_DEF).when(TEST_ASSET_MANAGER).loadAsset(Mockito.any(AssetKey.class));
+    JsonImporter importer =
+        new JsonImporter(new ByteArrayInputStream(json.getBytes()), TEST_ASSET_MANAGER);
     JsonInputCapsule jsonInputCapsule = (JsonInputCapsule) importer.getCapsule(null);
-    Map<String, ? extends Savable> res = jsonInputCapsule
-        .readStringSavableMap("myField", null);
+    Map<String, ? extends Savable> res = jsonInputCapsule.readStringSavableMap("myField", null);
     Assertions.assertEquals(2, res.size());
     Assertions.assertTrue(res.containsKey("key1"));
     Assertions.assertTrue(value.contentEquals(res.get("key1")));
     Assertions.assertTrue(res.containsKey("key2"));
-    Assertions.assertTrue(LightProbe.class.isInstance(res.get("key2")));
+    Assertions.assertTrue(res.get("key2") instanceof LightProbe);
   }
 
   @Test
@@ -416,17 +433,16 @@ public static final MaterialDef TEST_MAT_DEF = new MaterialDef(TEST_ASSET_MANAGE
     value.getAdditionalRenderState().setBlendEquationAlpha(BlendEquationAlpha.InheritColor);
     value.getAdditionalRenderState().setDepthTest(true);
     value.getAdditionalRenderState().setBlendMode(BlendMode.Additive);
-    Mockito.doReturn(TEST_MAT_DEF).when(TEST_ASSET_MANAGER).loadAsset(Mockito.any(
-        AssetKey.class));
-    JsonImporter importer = new JsonImporter(new ByteArrayInputStream(json.getBytes()), TEST_ASSET_MANAGER);
+    Mockito.doReturn(TEST_MAT_DEF).when(TEST_ASSET_MANAGER).loadAsset(Mockito.any(AssetKey.class));
+    JsonImporter importer =
+        new JsonImporter(new ByteArrayInputStream(json.getBytes()), TEST_ASSET_MANAGER);
     JsonInputCapsule jsonInputCapsule = (JsonInputCapsule) importer.getCapsule(null);
-    IntMap<? extends Savable> res = jsonInputCapsule
-        .readIntSavableMap("myField", null);
+    IntMap<? extends Savable> res = jsonInputCapsule.readIntSavableMap("myField", null);
     Assertions.assertEquals(2, res.size());
     Assertions.assertTrue(res.containsKey(1));
     Assertions.assertTrue(value.contentEquals(res.get(1)));
     Assertions.assertTrue(res.containsKey(12));
-    Assertions.assertTrue(LightProbe.class.isInstance(res.get(12)));
+    Assertions.assertTrue(res.get(12) instanceof LightProbe);
   }
 
   @Test
@@ -445,5 +461,16 @@ public static final MaterialDef TEST_MAT_DEF = new MaterialDef(TEST_ASSET_MANAGE
   void readByteBufferArrayList() {}
 
   @Test
-  void readEnum() {}
+  void readEnum() throws IOException {
+
+    String json = "{\"myField\":\"" + TestFunction.Always.name() + "\"}";
+    JsonInputCapsule jsonInputCapsule =
+        new JsonInputCapsule(new ByteArrayInputStream(json.getBytes()), new JsonImporter());
+
+    TestFunction res = jsonInputCapsule.readEnum("myField", TestFunction.class, null);
+    Assertions.assertEquals(TestFunction.Always, res);
+    Assertions.assertEquals(
+        TestFunction.Equal,
+        jsonInputCapsule.readEnum("doestnotexists", TestFunction.class, TestFunction.Equal));
+  }
 }
