@@ -11,10 +11,15 @@ import com.jme3.material.RenderState.BlendEquation;
 import com.jme3.material.RenderState.BlendEquationAlpha;
 import com.jme3.material.RenderState.BlendMode;
 import com.jme3.material.RenderState.TestFunction;
+import com.jme3.math.Vector3f;
+import com.jme3.scene.debug.Arrow;
 import com.jme3.util.IntMap;
-import com.sun.tools.javac.util.ByteBuffer;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+import java.nio.ShortBuffer;
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Map;
@@ -373,7 +378,26 @@ class JsonOutputCapsuleTest {
   void writeSavableArray() {}
 
   @org.junit.jupiter.api.Test
-  void writeSavableArray2D() {}
+  void writeSavableArray2D() throws IOException {
+    Arrow arrow = new Arrow(new Vector3f(1, 2, 3));
+    Arrow arrow2 = new Arrow(new Vector3f(1, 2, 3));
+    Arrow arrow3 = new Arrow(new Vector3f(1, 2, 3));
+    Arrow arrow4 = new Arrow(new Vector3f(1, 2, 3));
+    Arrow arrow5 = new Arrow(new Vector3f(1, 2, 3));
+    Arrow arrow6 = new Arrow(new Vector3f(1, 2, 3));
+    Savable[][] myValues = new Savable[][]{new Savable[]{arrow, arrow2},
+        new Savable[]{arrow3, arrow4}};
+    Savable[][] defVal = new Savable[][]{new Savable[]{arrow5}, new Savable[]{}};
+
+    jGenerator.writeStartObject();
+    jsonOutputCapsule.write(myValues, "myField", defVal);
+    jGenerator.writeEndObject();
+    jGenerator.close();
+    System.out.println(stringWriter.toString());
+    Assertions.assertEquals(
+        "{\"myField\":[[\"value1\",\"value2\"],[\"value3\",\"value4\"]]}",
+        stringWriter.toString());
+  }
 
   @org.junit.jupiter.api.Test
   void writeSavableArrayList() {}
@@ -462,17 +486,67 @@ class JsonOutputCapsuleTest {
   }
 
   @org.junit.jupiter.api.Test
-  void writeFloatBuffer() {}
-
-  @org.junit.jupiter.api.Test
-  void writeIntBuffer() {}
-
-  @org.junit.jupiter.api.Test
-  void writeByteBuffer() {
+  void writeFloatBuffer() throws IOException {
+    FloatBuffer buffer = FloatBuffer.allocate(5);
+    buffer.put(1.5f);
+    buffer.put(2f);
+    buffer.put(3.3f);
+    buffer.put(4.3f);
+    jGenerator.writeStartObject();
+    jsonOutputCapsule.write(buffer, "myField", null);
+    jGenerator.writeEndObject();
+    jGenerator.close();
+    System.out.println(stringWriter.toString());
+    String json = "{\"myField\":[1.5,2.0,3.3,4.3,0.0]}";
+    Assertions.assertEquals(json, stringWriter.toString());
   }
 
   @org.junit.jupiter.api.Test
-  void writeShortBuffer() {
+  void writeIntBuffer() throws IOException {
+    IntBuffer buffer = IntBuffer.allocate(5);
+    buffer.put(1);
+    buffer.put(2);
+    buffer.put(3);
+    buffer.put(4);
+    jGenerator.writeStartObject();
+    jsonOutputCapsule.write(buffer, "myField", null);
+    jGenerator.writeEndObject();
+    jGenerator.close();
+    System.out.println(stringWriter.toString());
+    String json = "{\"myField\":[1,2,3,4,0]}";
+    Assertions.assertEquals(json, stringWriter.toString());
+  }
+
+  @org.junit.jupiter.api.Test
+  void writeByteBuffer() throws IOException {
+    ByteBuffer buffer = ByteBuffer.allocate(5);
+    buffer.put((byte) 1);
+    buffer.put((byte) 2);
+    buffer.put((byte) 3);
+    buffer.put((byte) 4);
+    jGenerator.writeStartObject();
+    jsonOutputCapsule.write(buffer, "myField", null);
+    jGenerator.writeEndObject();
+    jGenerator.close();
+    System.out.println(stringWriter.toString());
+    String json = "{\"myField\":[1,2,3,4,0]}";
+    Assertions.assertEquals(json, stringWriter.toString());
+  }
+
+  @org.junit.jupiter.api.Test
+  void writeShortBuffer() throws IOException {
+    ShortBuffer buffer = ShortBuffer.allocate(5);
+    buffer.put((short) 1);
+    buffer.put((short) 2);
+    buffer.put((short) 3);
+    buffer.put((short) 4);
+    jGenerator.writeStartObject();
+    jsonOutputCapsule.write(buffer, "myField", null);
+    jGenerator.writeEndObject();
+    jGenerator.close();
+    System.out.println(stringWriter.toString());
+    String json = "{\"myField\":[1,2,3,4,0]}";
+    Assertions.assertEquals(json, stringWriter.toString());
   }
 
   @org.junit.jupiter.api.Test
@@ -496,7 +570,7 @@ class JsonOutputCapsuleTest {
     ObjectMapper objectMapper = new ObjectMapper();
     StringWriter stringWriter = new StringWriter();
     Map<Object, Object> map = new HashMap<>();
-    map.put(new JLabel(), new ByteBuffer());
+    map.put(new JLabel(), new BitSet());
     byte[] mybyte = new byte[]{3, 2, 1};
     objectMapper.writeValue(stringWriter, map);
     System.out.println(stringWriter.toString());

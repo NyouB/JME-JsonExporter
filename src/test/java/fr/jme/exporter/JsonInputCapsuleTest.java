@@ -13,6 +13,10 @@ import com.jme3.material.RenderState.TestFunction;
 import com.jme3.util.IntMap;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+import java.nio.ShortBuffer;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Map;
@@ -446,16 +450,68 @@ class JsonInputCapsuleTest {
   }
 
   @Test
-  void readFloatBuffer() {}
+  void readFloatBuffer() throws IOException {
+    FloatBuffer expected = FloatBuffer.allocate(5);
+    expected.put(1.5f);
+    expected.put(2.2f);
+    expected.put(3.3f);
+    expected.put(4.4f);
+    expected.put(0f);
+    String json = "{\"myField\":[1.5,2.2,3.3,4.4,0]}";
+    JsonInputCapsule jsonInputCapsule =
+        new JsonInputCapsule(new ByteArrayInputStream(json.getBytes()), new JsonImporter());
+
+    FloatBuffer res = jsonInputCapsule.readFloatBuffer("myField", null);
+    Assertions.assertEquals(expected, res);
+  }
 
   @Test
-  void readIntBuffer() {}
+  void readIntBuffer() throws IOException {
+    IntBuffer expected = IntBuffer.allocate(5);
+    expected.put(1);
+    expected.put(2);
+    expected.put(3);
+    expected.put(4);
+    expected.put(0);
+    String json = "{\"myField\":[1,2,3,4,0]}";
+    JsonInputCapsule jsonInputCapsule =
+        new JsonInputCapsule(new ByteArrayInputStream(json.getBytes()), new JsonImporter());
+
+    IntBuffer res = jsonInputCapsule.readIntBuffer("myField", null);
+    Assertions.assertEquals(expected, res);
+  }
 
   @Test
-  void readByteBuffer() {}
+  void readByteBuffer() throws IOException {
+    ByteBuffer expected = ByteBuffer.allocate(5);
+    expected.put((byte) 1);
+    expected.put((byte) 2);
+    expected.put((byte) 3);
+    expected.put((byte) 4);
+    expected.put((byte) 0);
+    String json = "{\"myField\":[1,2,3,4,0]}";
+    JsonInputCapsule jsonInputCapsule =
+        new JsonInputCapsule(new ByteArrayInputStream(json.getBytes()), new JsonImporter());
+
+    ByteBuffer res = jsonInputCapsule.readByteBuffer("myField", null);
+    Assertions.assertEquals(expected, res);
+  }
 
   @Test
-  void readShortBuffer() {}
+  void readShortBuffer() throws IOException {
+    ShortBuffer expected = ShortBuffer.allocate(5);
+    expected.put((short) 1);
+    expected.put((short) 2);
+    expected.put((short) 3);
+    expected.put((short) 4);
+    expected.put((short) 0);
+    String json = "{\"myField\":[1,2,3,4,0]}";
+    JsonInputCapsule jsonInputCapsule =
+        new JsonInputCapsule(new ByteArrayInputStream(json.getBytes()), new JsonImporter());
+
+    ShortBuffer res = jsonInputCapsule.readShortBuffer("myField", null);
+    Assertions.assertEquals(expected, res);
+  }
 
   @Test
   void readByteBufferArrayList() {}

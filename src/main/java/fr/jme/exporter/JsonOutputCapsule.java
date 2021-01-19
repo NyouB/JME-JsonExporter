@@ -20,8 +20,8 @@ import java.util.Map;
 public class JsonOutputCapsule implements OutputCapsule {
 
   private static final String dataAttributeName = "data";
-  private JsonGenerator jsonGenerator;
-  private JmeExporter exporter;
+  private final JsonGenerator jsonGenerator;
+  private final JmeExporter exporter;
 
   public JsonOutputCapsule(JsonGenerator jsonGenerator, JmeExporter exporter) {
     this.jsonGenerator = jsonGenerator;
@@ -581,34 +581,11 @@ public class JsonOutputCapsule implements OutputCapsule {
       return;
     }
 
-    jsonGenerator.writeFieldName(name);
-    jsonGenerator.writeNumberField("size", value.limit());
-    StringBuilder buf = new StringBuilder();
-    int pos = value.position();
-    value.rewind();
-    int ctr = 0;
-    while (value.hasRemaining()) {
-      ctr++;
-      buf.append(value.get());
-      buf.append(" ");
+    jsonGenerator.writeArrayFieldStart(name);
+    for (int i = 0; i < value.array().length; i++) {
+      jsonGenerator.writeNumber(value.array()[i]);
     }
-    if (ctr != value.limit()) {
-      throw new IOException(
-          "'"
-              + name
-              + "' buffer contention resulted in write data consistency.  "
-              + ctr
-              + " values written when should have written "
-              + value.limit());
-    }
-
-    if (buf.length() > 0) {
-      // remove last space
-      buf.setLength(buf.length() - 1);
-    }
-
-    value.position(pos);
-    jsonGenerator.writeStringField(dataAttributeName, buf.toString());
+    jsonGenerator.writeEndArray();
   }
 
   @Override
@@ -620,34 +597,11 @@ public class JsonOutputCapsule implements OutputCapsule {
       return;
     }
 
-    jsonGenerator.writeFieldName(name);
-    jsonGenerator.writeNumberField("size", value.limit());
-    StringBuilder buf = new StringBuilder();
-    int pos = value.position();
-    value.rewind();
-    int ctr = 0;
-    while (value.hasRemaining()) {
-      ctr++;
-      buf.append(value.get());
-      buf.append(" ");
+    jsonGenerator.writeArrayFieldStart(name);
+    for (int i = 0; i < value.array().length; i++) {
+      jsonGenerator.writeNumber(value.array()[i]);
     }
-    if (ctr != value.limit()) {
-      throw new IOException(
-          "'"
-              + name
-              + "' buffer contention resulted in write data consistency.  "
-              + ctr
-              + " values written when should have written "
-              + value.limit());
-    }
-
-    if (buf.length() > 0) {
-      // remove last space
-      buf.setLength(buf.length() - 1);
-    }
-
-    value.position(pos);
-    jsonGenerator.writeStringField(dataAttributeName, buf.toString());
+    jsonGenerator.writeEndArray();
   }
 
   @Override
@@ -659,34 +613,11 @@ public class JsonOutputCapsule implements OutputCapsule {
       return;
     }
 
-    jsonGenerator.writeFieldName(name);
-    jsonGenerator.writeNumberField("size", value.limit());
-    StringBuilder buf = new StringBuilder();
-    int pos = value.position();
-    value.rewind();
-    int ctr = 0;
-    while (value.hasRemaining()) {
-      ctr++;
-      buf.append(value.get());
-      buf.append(" ");
+    jsonGenerator.writeArrayFieldStart(name);
+    for (int i = 0; i < value.array().length; i++) {
+      jsonGenerator.writeNumber(value.array()[i]);
     }
-    if (ctr != value.limit()) {
-      throw new IOException(
-          "'"
-              + name
-              + "' buffer contention resulted in write data consistency.  "
-              + ctr
-              + " values written when should have written "
-              + value.limit());
-    }
-
-    if (buf.length() > 0) {
-      // remove last space
-      buf.setLength(buf.length() - 1);
-    }
-
-    value.position(pos);
-    jsonGenerator.writeStringField(dataAttributeName, buf.toString());
+    jsonGenerator.writeEndArray();
   }
 
   @Override
@@ -698,34 +629,11 @@ public class JsonOutputCapsule implements OutputCapsule {
       return;
     }
 
-    jsonGenerator.writeFieldName(name);
-    jsonGenerator.writeNumberField("size", value.limit());
-    StringBuilder buf = new StringBuilder();
-    int pos = value.position();
-    value.rewind();
-    int ctr = 0;
-    while (value.hasRemaining()) {
-      ctr++;
-      buf.append(value.get());
-      buf.append(" ");
+    jsonGenerator.writeArrayFieldStart(name);
+    for (int i = 0; i < value.array().length; i++) {
+      jsonGenerator.writeNumber(value.array()[i]);
     }
-    if (ctr != value.limit()) {
-      throw new IOException(
-          "'"
-              + name
-              + "' buffer contention resulted in write data consistency.  "
-              + ctr
-              + " values written when should have written "
-              + value.limit());
-    }
-
-    if (buf.length() > 0) {
-      // remove last space
-      buf.setLength(buf.length() - 1);
-    }
-
-    value.position(pos);
-    jsonGenerator.writeStringField(dataAttributeName, buf.toString());
+    jsonGenerator.writeEndArray();
   }
 
   @Override
@@ -754,5 +662,6 @@ public class JsonOutputCapsule implements OutputCapsule {
     for (ByteBuffer o : array) {
       write(o, "ByteBuffer", null);
     }
+    jsonGenerator.writeEndObject();
   }
 }

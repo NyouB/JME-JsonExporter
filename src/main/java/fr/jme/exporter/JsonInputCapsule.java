@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jme3.export.InputCapsule;
 import com.jme3.export.Savable;
 import com.jme3.export.SavableClassUtil;
-import com.jme3.util.BufferUtils;
 import com.jme3.util.IntMap;
 import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 import java.io.IOException;
@@ -30,6 +29,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class JsonInputCapsule implements InputCapsule {
+
   private static final Logger logger = LoggerFactory.getLogger(JsonInputCapsule.class);
   private final JsonImporter importer;
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -37,8 +37,8 @@ public class JsonInputCapsule implements InputCapsule {
   private JsonNode currentNode = null;
 
   private Element currentElem;
-  private boolean isAtRoot = true;
-  private Map<String, Savable> referencedSavables = new HashMap<String, Savable>();
+  private final boolean isAtRoot = true;
+  private final Map<String, Savable> referencedSavables = new HashMap<String, Savable>();
 
   private int[] classHierarchyVersions;
   private Savable savable;
@@ -119,8 +119,7 @@ public class JsonInputCapsule implements InputCapsule {
     try {
       return Byte.parseByte(tmpString);
     } catch (NumberFormatException nfe) {
-      IOException io = new IOException(nfe.toString());
-      io.initCause(nfe);
+      IOException io = new IOException(nfe.toString(), nfe);
       throw io;
     }
   }
@@ -569,8 +568,7 @@ public class JsonInputCapsule implements InputCapsule {
     } catch (IOException ioe) {
       throw ioe;
     } catch (Exception e) {
-      IOException io = new IOException(e.toString());
-      io.initCause(e);
+      IOException io = new IOException(e.toString(), e);
       throw io;
     }
   }
@@ -603,8 +601,7 @@ public class JsonInputCapsule implements InputCapsule {
     } catch (IOException ioe) {
       throw ioe;
     } catch (Exception e) {
-      IOException io = new IOException(e.toString());
-      io.initCause(e);
+      IOException io = new IOException(e.toString(), e);
       throw io;
     }
   }
@@ -639,8 +636,7 @@ public class JsonInputCapsule implements InputCapsule {
     } catch (IOException ioe) {
       throw ioe;
     } catch (Exception e) {
-      IOException io = new IOException(e.toString());
-      io.initCause(e);
+      IOException io = new IOException(e.toString(), e);
       throw io;
     }
   }
@@ -678,12 +674,10 @@ public class JsonInputCapsule implements InputCapsule {
     } catch (IOException ioe) {
       throw ioe;
     } catch (NumberFormatException nfe) {
-      IOException io = new IOException(nfe.toString());
-      io.initCause(nfe);
+      IOException io = new IOException(nfe.toString(), nfe);
       throw io;
     } catch (DOMException de) {
-      IOException io = new IOException(de.toString());
-      io.initCause(de);
+      IOException io = new IOException(de.toString(), de);
       throw io;
     }
   }
@@ -718,8 +712,7 @@ public class JsonInputCapsule implements InputCapsule {
     } catch (IOException ioe) {
       throw ioe;
     } catch (Exception e) {
-      IOException io = new IOException(e.toString());
-      io.initCause(e);
+      IOException io = new IOException(e.toString(), e);
       throw io;
     }
   }
@@ -754,12 +747,10 @@ public class JsonInputCapsule implements InputCapsule {
     } catch (IOException ioe) {
       throw ioe;
     } catch (NumberFormatException nfe) {
-      IOException io = new IOException(nfe.toString());
-      io.initCause(nfe);
+      IOException io = new IOException(nfe.toString(), nfe);
       throw io;
     } catch (DOMException de) {
-      IOException io = new IOException(de.toString());
-      io.initCause(de);
+      IOException io = new IOException(de.toString(), de);
       throw io;
     }
   }
@@ -848,155 +839,67 @@ public class JsonInputCapsule implements InputCapsule {
 
   /** reads from currentElem if name is null */
   public FloatBuffer readFloatBuffer(String name, FloatBuffer defVal) throws IOException {
-    try {
-      Element tmpEl;
-      if (name != null) {
-        tmpEl = findChildElement(currentElem, name);
-      } else {
-        tmpEl = currentElem;
-      }
-      if (tmpEl == null) {
-        return defVal;
-      }
-      String sizeString = tmpEl.getAttribute("size");
-      String[] strings = parseTokens(tmpEl.getAttribute("data"));
-      if (sizeString.length() > 0) {
-        int requiredSize = Integer.parseInt(sizeString);
-        if (strings.length != requiredSize)
-          throw new IOException(
-              "Wrong number of float buffers for '"
-                  + name
-                  + "'.  size says "
-                  + requiredSize
-                  + ", data contains "
-                  + strings.length);
-      }
-      FloatBuffer tmp = BufferUtils.createFloatBuffer(strings.length);
-      for (String s : strings) tmp.put(Float.parseFloat(s));
-      tmp.flip();
-      return tmp;
-    } catch (IOException ioe) {
-      throw ioe;
-    } catch (NumberFormatException nfe) {
-      IOException io = new IOException(nfe.toString());
-      io.initCause(nfe);
-      throw io;
-    } catch (DOMException de) {
-      IOException io = new IOException(de.toString());
-      io.initCause(de);
-      throw io;
+    if (!currentNode.has(name)) {
+      return defVal;
     }
+    JsonNode arrayNode = currentNode.get(name);
+    if (arrayNode == null || arrayNode.size() < 1) {
+      return defVal;
+    }
+    FloatBuffer res = FloatBuffer.allocate(arrayNode.size());
+    for (int i = 0; i < arrayNode.size(); i++) {
+      res.put(Float.parseFloat(arrayNode.get(i).asText()));
+    }
+
+    return res;
   }
 
   public IntBuffer readIntBuffer(String name, IntBuffer defVal) throws IOException {
-    try {
-      Element tmpEl = findChildElement(currentElem, name);
-      if (tmpEl == null) {
-        return defVal;
-      }
-
-      String sizeString = tmpEl.getAttribute("size");
-      String[] strings = parseTokens(tmpEl.getAttribute("data"));
-      if (sizeString.length() > 0) {
-        int requiredSize = Integer.parseInt(sizeString);
-        if (strings.length != requiredSize)
-          throw new IOException(
-              "Wrong number of int buffers for '"
-                  + name
-                  + "'.  size says "
-                  + requiredSize
-                  + ", data contains "
-                  + strings.length);
-      }
-      IntBuffer tmp = BufferUtils.createIntBuffer(strings.length);
-      for (String s : strings) tmp.put(Integer.parseInt(s));
-      tmp.flip();
-      return tmp;
-    } catch (IOException ioe) {
-      throw ioe;
-    } catch (NumberFormatException nfe) {
-      IOException io = new IOException(nfe.toString());
-      io.initCause(nfe);
-      throw io;
-    } catch (DOMException de) {
-      IOException io = new IOException(de.toString());
-      io.initCause(de);
-      throw io;
+    if (!currentNode.has(name)) {
+      return defVal;
     }
+    JsonNode arrayNode = currentNode.get(name);
+    if (arrayNode == null || arrayNode.size() < 1) {
+      return defVal;
+    }
+    IntBuffer res = IntBuffer.allocate(arrayNode.size());
+    for (int i = 0; i < arrayNode.size(); i++) {
+      res.put(arrayNode.get(i).asInt());
+    }
+
+    return res;
   }
 
   public ByteBuffer readByteBuffer(String name, ByteBuffer defVal) throws IOException {
-    try {
-      Element tmpEl = findChildElement(currentElem, name);
-      if (tmpEl == null) {
-        return defVal;
-      }
-
-      String sizeString = tmpEl.getAttribute("size");
-      String[] strings = parseTokens(tmpEl.getAttribute("data"));
-      if (sizeString.length() > 0) {
-        int requiredSize = Integer.parseInt(sizeString);
-        if (strings.length != requiredSize)
-          throw new IOException(
-              "Wrong number of byte buffers for '"
-                  + name
-                  + "'.  size says "
-                  + requiredSize
-                  + ", data contains "
-                  + strings.length);
-      }
-      ByteBuffer tmp = BufferUtils.createByteBuffer(strings.length);
-      for (String s : strings) tmp.put(Byte.valueOf(s));
-      tmp.flip();
-      return tmp;
-    } catch (IOException ioe) {
-      throw ioe;
-    } catch (NumberFormatException nfe) {
-      IOException io = new IOException(nfe.toString());
-      io.initCause(nfe);
-      throw io;
-    } catch (DOMException de) {
-      IOException io = new IOException(de.toString());
-      io.initCause(de);
-      throw io;
+    if (!currentNode.has(name)) {
+      return defVal;
     }
+    JsonNode arrayNode = currentNode.get(name);
+    if (arrayNode == null || arrayNode.size() < 1) {
+      return defVal;
+    }
+    ByteBuffer res = ByteBuffer.allocate(arrayNode.size());
+    for (int i = 0; i < arrayNode.size(); i++) {
+      res.put((byte) arrayNode.get(i).asInt());
+    }
+
+    return res;
   }
 
   public ShortBuffer readShortBuffer(String name, ShortBuffer defVal) throws IOException {
-    try {
-      Element tmpEl = findChildElement(currentElem, name);
-      if (tmpEl == null) {
-        return defVal;
-      }
-
-      String sizeString = tmpEl.getAttribute("size");
-      String[] strings = parseTokens(tmpEl.getAttribute("data"));
-      if (sizeString.length() > 0) {
-        int requiredSize = Integer.parseInt(sizeString);
-        if (strings.length != requiredSize)
-          throw new IOException(
-              "Wrong number of short buffers for '"
-                  + name
-                  + "'.  size says "
-                  + requiredSize
-                  + ", data contains "
-                  + strings.length);
-      }
-      ShortBuffer tmp = BufferUtils.createShortBuffer(strings.length);
-      for (String s : strings) tmp.put(Short.valueOf(s));
-      tmp.flip();
-      return tmp;
-    } catch (IOException ioe) {
-      throw ioe;
-    } catch (NumberFormatException nfe) {
-      IOException io = new IOException(nfe.toString());
-      io.initCause(nfe);
-      throw io;
-    } catch (DOMException de) {
-      IOException io = new IOException(de.toString());
-      io.initCause(de);
-      throw io;
+    if (!currentNode.has(name)) {
+      return defVal;
     }
+    JsonNode arrayNode = currentNode.get(name);
+    if (arrayNode == null || arrayNode.size() < 1) {
+      return defVal;
+    }
+    ShortBuffer res = ShortBuffer.allocate(arrayNode.size());
+    for (int i = 0; i < arrayNode.size(); i++) {
+      res.put((short) arrayNode.get(i).asInt());
+    }
+
+    return res;
   }
 
   public ArrayList<ByteBuffer> readByteBufferArrayList(String name, ArrayList<ByteBuffer> defVal)
@@ -1030,12 +933,10 @@ public class JsonInputCapsule implements InputCapsule {
     } catch (IOException ioe) {
       throw ioe;
     } catch (NumberFormatException nfe) {
-      IOException io = new IOException(nfe.toString());
-      io.initCause(nfe);
+      IOException io = new IOException(nfe.toString(), nfe);
       throw io;
     } catch (DOMException de) {
-      IOException io = new IOException(de.toString());
-      io.initCause(de);
+      IOException io = new IOException(de.toString(), de);
       throw io;
     }
   }
@@ -1052,8 +953,7 @@ public class JsonInputCapsule implements InputCapsule {
         }
       }
     } catch (Exception e) {
-      IOException io = new IOException(e.toString());
-      io.initCause(e);
+      IOException io = new IOException(e.toString(), e);
       throw io;
     }
     return ret;
