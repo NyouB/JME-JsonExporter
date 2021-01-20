@@ -20,6 +20,8 @@ import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Map;
@@ -310,14 +312,14 @@ class JsonOutputCapsuleTest {
 
   @org.junit.jupiter.api.Test
   void writeStringArray() throws IOException {
-    boolean[] myValues = new boolean[] {true, false, false};
-    boolean[] defVal = new boolean[] {true, true, false};
+    String[] myValues = new String[]{"str1", "str2", "str3"};
+    String[] defVal = new String[]{"str1", "str2", "str3"};
 
     jGenerator.writeStartObject();
     jsonOutputCapsule.write(myValues, "myField", defVal);
     jGenerator.writeEndObject();
     jGenerator.close();
-    Assertions.assertEquals("{\"myField\":[true,false,false]}", stringWriter.toString());
+    Assertions.assertEquals("{\"myField\":[\"str1\",\"str2\",\"str3\"]}", stringWriter.toString());
   }
 
   @org.junit.jupiter.api.Test
@@ -375,7 +377,19 @@ class JsonOutputCapsuleTest {
   }
 
   @org.junit.jupiter.api.Test
-  void writeSavableArray() {}
+  void writeSavableArray() throws IOException {
+    Savable[] myValues = new Savable[]{new TestSavable(), new TestSavable()};
+    Savable[] defVal = new Savable[]{};
+
+    jGenerator.writeStartObject();
+    jsonOutputCapsule.write(myValues, "myField", defVal);
+    jGenerator.writeEndObject();
+    jGenerator.close();
+    System.out.println(stringWriter.toString());
+    Assertions.assertEquals(
+        "{\"myField\":[[\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"myString\"}],[\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"myString\"}]]}",
+        stringWriter.toString());
+  }
 
   @org.junit.jupiter.api.Test
   void writeSavableArray2D() throws IOException {
@@ -384,7 +398,6 @@ class JsonOutputCapsuleTest {
     Arrow arrow3 = new Arrow(new Vector3f(1, 2, 3));
     Arrow arrow4 = new Arrow(new Vector3f(1, 2, 3));
     Arrow arrow5 = new Arrow(new Vector3f(1, 2, 3));
-    Arrow arrow6 = new Arrow(new Vector3f(1, 2, 3));
     Savable[][] myValues = new Savable[][]{new Savable[]{arrow, arrow2},
         new Savable[]{arrow3, arrow4}};
     Savable[][] defVal = new Savable[][]{new Savable[]{arrow5}, new Savable[]{}};
@@ -395,12 +408,24 @@ class JsonOutputCapsuleTest {
     jGenerator.close();
     System.out.println(stringWriter.toString());
     Assertions.assertEquals(
-        "{\"myField\":[[\"value1\",\"value2\"],[\"value3\",\"value4\"]]}",
+        "{\"myField\":[[[\"com.jme3.scene.debug.Arrow\",{\"modelBound\":[\"com.jme3.bounding.BoundingBox\",{\"center\":[\"com.jme3.math.Vector3f\",{\"x\":0.53874123,\"y\":1.0,\"z\":1.5000001}],\"xExtent\":0.53874123,\"yExtent\":1.0,\"zExtent\":1.5000001}],\"vertCount\":6,\"elementCount\":5,\"instanceCount\":1,\"max_num_weights\":-1,\"mode\":\"Lines\",\"pointSize\":1.0,\"buffers\":{\"0\":[\"com.jme3.scene.VertexBuffer\",{\"components\":3,\"usage\":\"Dynamic\",\"buffer_type\":\"Position\",\"format\":\"Float\",\"normalized\":false,\"offset\":0,\"stride\":0,\"instanceSpan\":0,\"dataFloat\":[]}],\"9\":[\"com.jme3.scene.VertexBuffer\",{\"components\":2,\"usage\":\"Dynamic\",\"buffer_type\":\"Index\",\"format\":\"UnsignedShort\",\"normalized\":false,\"offset\":0,\"stride\":0,\"instanceSpan\":0,\"dataUnsignedShort\":[]}]}}],[\"com.jme3.scene.debug.Arrow\",{\"modelBound\":[\"com.jme3.bounding.BoundingBox\",{\"center\":[\"com.jme3.math.Vector3f\",{\"x\":0.53874123,\"y\":1.0,\"z\":1.5000001}],\"xExtent\":0.53874123,\"yExtent\":1.0,\"zExtent\":1.5000001}],\"vertCount\":6,\"elementCount\":5,\"instanceCount\":1,\"max_num_weights\":-1,\"mode\":\"Lines\",\"pointSize\":1.0,\"buffers\":{\"0\":[\"com.jme3.scene.VertexBuffer\",{\"components\":3,\"usage\":\"Dynamic\",\"buffer_type\":\"Position\",\"format\":\"Float\",\"normalized\":false,\"offset\":0,\"stride\":0,\"instanceSpan\":0,\"dataFloat\":[]}],\"9\":[\"com.jme3.scene.VertexBuffer\",{\"components\":2,\"usage\":\"Dynamic\",\"buffer_type\":\"Index\",\"format\":\"UnsignedShort\",\"normalized\":false,\"offset\":0,\"stride\":0,\"instanceSpan\":0,\"dataUnsignedShort\":[]}]}}]],[[\"com.jme3.scene.debug.Arrow\",{\"modelBound\":[\"com.jme3.bounding.BoundingBox\",{\"center\":[\"com.jme3.math.Vector3f\",{\"x\":0.53874123,\"y\":1.0,\"z\":1.5000001}],\"xExtent\":0.53874123,\"yExtent\":1.0,\"zExtent\":1.5000001}],\"vertCount\":6,\"elementCount\":5,\"instanceCount\":1,\"max_num_weights\":-1,\"mode\":\"Lines\",\"pointSize\":1.0,\"buffers\":{\"0\":[\"com.jme3.scene.VertexBuffer\",{\"components\":3,\"usage\":\"Dynamic\",\"buffer_type\":\"Position\",\"format\":\"Float\",\"normalized\":false,\"offset\":0,\"stride\":0,\"instanceSpan\":0,\"dataFloat\":[]}],\"9\":[\"com.jme3.scene.VertexBuffer\",{\"components\":2,\"usage\":\"Dynamic\",\"buffer_type\":\"Index\",\"format\":\"UnsignedShort\",\"normalized\":false,\"offset\":0,\"stride\":0,\"instanceSpan\":0,\"dataUnsignedShort\":[]}]}}],[\"com.jme3.scene.debug.Arrow\",{\"modelBound\":[\"com.jme3.bounding.BoundingBox\",{\"center\":[\"com.jme3.math.Vector3f\",{\"x\":0.53874123,\"y\":1.0,\"z\":1.5000001}],\"xExtent\":0.53874123,\"yExtent\":1.0,\"zExtent\":1.5000001}],\"vertCount\":6,\"elementCount\":5,\"instanceCount\":1,\"max_num_weights\":-1,\"mode\":\"Lines\",\"pointSize\":1.0,\"buffers\":{\"0\":[\"com.jme3.scene.VertexBuffer\",{\"components\":3,\"usage\":\"Dynamic\",\"buffer_type\":\"Position\",\"format\":\"Float\",\"normalized\":false,\"offset\":0,\"stride\":0,\"instanceSpan\":0,\"dataFloat\":[]}],\"9\":[\"com.jme3.scene.VertexBuffer\",{\"components\":2,\"usage\":\"Dynamic\",\"buffer_type\":\"Index\",\"format\":\"UnsignedShort\",\"normalized\":false,\"offset\":0,\"stride\":0,\"instanceSpan\":0,\"dataUnsignedShort\":[]}]}}]]]}",
         stringWriter.toString());
   }
 
   @org.junit.jupiter.api.Test
-  void writeSavableArrayList() {}
+  void writeSavableArrayList() throws IOException {
+    ArrayList<Savable> myValues = new ArrayList<>(Arrays.asList(new TestSavable(),
+        new TestSavable()));
+
+    jGenerator.writeStartObject();
+    jsonOutputCapsule.writeSavableArrayList(myValues, "myField", null);
+    jGenerator.writeEndObject();
+    jGenerator.close();
+    System.out.println(stringWriter.toString());
+    Assertions.assertEquals(
+        "{\"myField\":[[\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"myString\"}],[\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"myString\"}]]}",
+        stringWriter.toString());
+  }
 
   @org.junit.jupiter.api.Test
   void writeSavableArrayListArray() {}

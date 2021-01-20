@@ -19,6 +19,7 @@ import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -340,15 +341,38 @@ class JsonInputCapsuleTest {
   }
 
   @Test
-  void readSavableArray() {
+  void readSavableArray() throws IOException {
+    String json =
+        "{\"myField\":[[\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"myString\"}],[\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"myString\"}]]}";
+    Savable[] expected = new Savable[]{new TestSavable(), new TestSavable()};
+    JsonImporter jsonImporter = new JsonImporter(new ByteArrayInputStream(json.getBytes()));
+    JsonInputCapsule jsonInputCapsule = (JsonInputCapsule) jsonImporter.getCapsule(null);
+    Savable[] res = jsonInputCapsule.readSavableArray("myField", null);
+    Assertions.assertArrayEquals(expected, res);
   }
 
   @Test
-  void readSavableArray2D() {
+  void readSavableArray2D() throws IOException {
+    String json =
+        "{\"myField\":[[\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"myString\"}],[\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"myString\"}]]}";
+    Savable[] expected = new Savable[]{new TestSavable(), new TestSavable()};
+    JsonImporter jsonImporter = new JsonImporter(new ByteArrayInputStream(json.getBytes()));
+    JsonInputCapsule jsonInputCapsule = (JsonInputCapsule) jsonImporter.getCapsule(null);
+    Savable[] res = jsonInputCapsule.readSavableArray("myField", null);
+    Assertions.assertArrayEquals(expected, res);
   }
 
   @Test
-  void readSavableArrayList() {
+  void readSavableArrayList() throws IOException {
+    String json =
+        "{\"myField\":[[\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"myString\"}],[\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"myString\"}]]}";
+    List<Savable> expected = Arrays.asList(new Savable[]{new TestSavable(), new TestSavable()});
+    JsonImporter jsonImporter = new JsonImporter(new ByteArrayInputStream(json.getBytes()));
+    JsonInputCapsule jsonInputCapsule = (JsonInputCapsule) jsonImporter.getCapsule(null);
+    List<Savable> res = jsonInputCapsule.readSavableArrayList("myField", null);
+    for (int i = 0; i < expected.size(); i++) {
+      Assertions.assertEquals(expected.get(i), res.get(i));
+    }
   }
 
   @Test

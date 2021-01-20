@@ -9,7 +9,6 @@ import com.jme3.util.IntMap;
 import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -491,86 +490,41 @@ public class JsonInputCapsule implements InputCapsule {
     }
   }
 
-  private Savable readSavableFromCurrentElem(Savable defVal)
-      throws InstantiationException, ClassNotFoundException, NoSuchMethodException,
-          InvocationTargetException, IOException, IllegalAccessException {
-    Savable ret = defVal;
-    Savable tmp = null;
-
-    if (currentElem == null || currentElem.getNodeName().equals("null")) {
-      return null;
+  private Savable readSavableFromCurrentElem(Savable defVal) throws IOException {
+    JsonNode previousNode;
+    JsonNode fieldsNode = currentNode.get(1);
+    String className = currentNode.get(0).asText();
+    previousNode = currentNode;
+    currentNode = fieldsNode;
+    Savable res = null;
+    try {
+      res = SavableClassUtil.fromName(className, null);
+      res.read(importer);
+    } catch (Exception e) {
+      e.printStackTrace();
+      res = defVal;
+    } finally {
+      currentNode = previousNode;
+      return res;
     }
-    String reference = currentElem.getAttribute("ref");
-    if (reference.length() > 0) {
-      ret = referencedSavables.get(reference);
-    } else {
-      String className = currentElem.getNodeName();
-      if (currentElem.hasAttribute("class")) {
-        className = currentElem.getAttribute("class");
-      } else if (defVal != null) {
-        className = defVal.getClass().getName();
-      }
-      tmp = SavableClassUtil.fromName(className, null);
-
-      String versionsStr = currentElem.getAttribute("savable_versions");
-      if (versionsStr != null && !versionsStr.equals("")) {
-        String[] versionStr = versionsStr.split(",");
-        classHierarchyVersions = new int[versionStr.length];
-        for (int i = 0; i < classHierarchyVersions.length; i++) {
-          classHierarchyVersions[i] = Integer.parseInt(versionStr[i].trim());
-        }
-      } else {
-        classHierarchyVersions = null;
-      }
-
-      String refID = currentElem.getAttribute("reference_ID");
-      if (refID.length() < 1) refID = currentElem.getAttribute("id");
-      if (refID.length() > 0) referencedSavables.put(refID, tmp);
-      if (tmp != null) {
-        // Allows reading versions from this savable
-        savable = tmp;
-        tmp.read(importer);
-        ret = tmp;
-      }
-    }
-    return ret;
   }
 
   public Savable[] readSavableArray(String name, Savable[] defVal) throws IOException {
-    Savable[] ret = defVal;
-    try {
-      Element tmpEl = findChildElement(currentElem, name);
-      if (tmpEl == null) {
-        return defVal;
-      }
-
-      String sizeString = tmpEl.getAttribute("size");
-      List<Savable> savables = new ArrayList<Savable>();
-      for (currentElem = findFirstChildElement(tmpEl);
-          currentElem != null;
-          currentElem = findNextSiblingElement(currentElem)) {
-        savables.add(readSavableFromCurrentElem(null));
-      }
-      if (sizeString.length() > 0) {
-        int requiredSize = Integer.parseInt(sizeString);
-        if (savables.size() != requiredSize)
-          throw new IOException(
-              "Wrong number of Savables for '"
-                  + name
-                  + "'.  size says "
-                  + requiredSize
-                  + ", data contains "
-                  + savables.size());
-      }
-      ret = savables.toArray(new Savable[0]);
-      currentElem = (Element) tmpEl.getParentNode();
-      return ret;
-    } catch (IOException ioe) {
-      throw ioe;
-    } catch (Exception e) {
-      IOException io = new IOException(e.toString(), e);
-      throw io;
+    if (!currentNode.has(name)) {
+      return defVal;
     }
+    JsonNode arrayNode = currentNode.get(name);
+    JsonNode previousNode = currentNode;
+    if (arrayNode == null || arrayNode.size() < 1) {
+      return defVal;
+    }
+    Savable[] res = new Savable[arrayNode.size()];
+    for (int i = 0; i < arrayNode.size(); i++) {
+      currentNode = arrayNode.get(i);
+      res[i] = readSavableFromCurrentElem(null);
+    }
+    currentNode = previousNode;
+    return res;
   }
 
   public Savable[][] readSavableArray2D(String name, Savable[][] defVal) throws IOException {
@@ -607,38 +561,21 @@ public class JsonInputCapsule implements InputCapsule {
   }
 
   public ArrayList<Savable> readSavableArrayList(String name, ArrayList defVal) throws IOException {
-    try {
-      Element tmpEl = findChildElement(currentElem, name);
-      if (tmpEl == null) {
-        return defVal;
-      }
-
-      String sizeString = tmpEl.getAttribute("size");
-      ArrayList<Savable> savables = new ArrayList<Savable>();
-      for (currentElem = findFirstChildElement(tmpEl);
-          currentElem != null;
-          currentElem = findNextSiblingElement(currentElem)) {
-        savables.add(readSavableFromCurrentElem(null));
-      }
-      if (sizeString.length() > 0) {
-        int requiredSize = Integer.parseInt(sizeString);
-        if (savables.size() != requiredSize)
-          throw new IOException(
-              "Wrong number of Savable arrays for '"
-                  + name
-                  + "'.  size says "
-                  + requiredSize
-                  + ", data contains "
-                  + savables.size());
-      }
-      currentElem = (Element) tmpEl.getParentNode();
-      return savables;
-    } catch (IOException ioe) {
-      throw ioe;
-    } catch (Exception e) {
-      IOException io = new IOException(e.toString(), e);
-      throw io;
+    if (!currentNode.has(name)) {
+      return defVal;
     }
+    JsonNode arrayNode = currentNode.get(name);
+    JsonNode previousNode = currentNode;
+    if (arrayNode == null || arrayNode.size() < 1) {
+      return defVal;
+    }
+    ArrayList<Savable> res = new ArrayList<>();
+    for (int i = 0; i < arrayNode.size(); i++) {
+      currentNode = arrayNode.get(i);
+      res.add(readSavableFromCurrentElem(null));
+    }
+    currentNode = previousNode;
+    return res;
   }
 
   public ArrayList<Savable>[] readSavableArrayListArray(String name, ArrayList[] defVal)

@@ -413,20 +413,11 @@ public class JsonOutputCapsule implements OutputCapsule {
     if (array == null) {
       return;
     }
-    jsonGenerator.writeFieldName(name);
-    jsonGenerator.writeStartArray();
-    for (Object o : array) {
-      if (o == null) {
-        continue;
-      } else if (o instanceof Savable) {
-        Savable s = (Savable) o;
-        write(s, s.getClass().getName(), null);
-      } else {
-        throw new ClassCastException("Not a Savable instance: " + o);
-      }
-    }
-    jsonGenerator.writeEndArray();
+
+    write((Savable[]) array.toArray(new Savable[0]), name,
+        defVal == null ? null : (Savable[]) defVal.toArray(new Savable[0]));
   }
+
 
   @Override
   public void writeSavableArrayListArray(ArrayList[] objects, String name, ArrayList[] defVal)
@@ -569,7 +560,6 @@ public class JsonOutputCapsule implements OutputCapsule {
       write(entry.getValue(), Integer.toString(key), null);
     }
     jsonGenerator.writeEndObject();
-
   }
 
   @Override
@@ -582,8 +572,10 @@ public class JsonOutputCapsule implements OutputCapsule {
     }
 
     jsonGenerator.writeArrayFieldStart(name);
-    for (int i = 0; i < value.array().length; i++) {
-      jsonGenerator.writeNumber(value.array()[i]);
+    if (value.hasArray()) {
+      for (int i = 0; i < value.array().length; i++) {
+        jsonGenerator.writeNumber(value.array()[i]);
+      }
     }
     jsonGenerator.writeEndArray();
   }
@@ -598,8 +590,10 @@ public class JsonOutputCapsule implements OutputCapsule {
     }
 
     jsonGenerator.writeArrayFieldStart(name);
-    for (int i = 0; i < value.array().length; i++) {
-      jsonGenerator.writeNumber(value.array()[i]);
+    if (value.hasArray()) {
+      for (int i = 0; i < value.array().length; i++) {
+        jsonGenerator.writeNumber(value.array()[i]);
+      }
     }
     jsonGenerator.writeEndArray();
   }
@@ -614,8 +608,10 @@ public class JsonOutputCapsule implements OutputCapsule {
     }
 
     jsonGenerator.writeArrayFieldStart(name);
-    for (int i = 0; i < value.array().length; i++) {
-      jsonGenerator.writeNumber(value.array()[i]);
+    if (value.hasArray()) {
+      for (int i = 0; i < value.array().length; i++) {
+        jsonGenerator.writeNumber(value.array()[i]);
+      }
     }
     jsonGenerator.writeEndArray();
   }
@@ -630,8 +626,10 @@ public class JsonOutputCapsule implements OutputCapsule {
     }
 
     jsonGenerator.writeArrayFieldStart(name);
-    for (int i = 0; i < value.array().length; i++) {
-      jsonGenerator.writeNumber(value.array()[i]);
+    if (value.hasArray()) {
+      for (int i = 0; i < value.array().length; i++) {
+        jsonGenerator.writeNumber(value.array()[i]);
+      }
     }
     jsonGenerator.writeEndArray();
   }
