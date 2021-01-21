@@ -414,10 +414,11 @@ public class JsonOutputCapsule implements OutputCapsule {
       return;
     }
 
-    write((Savable[]) array.toArray(new Savable[0]), name,
+    write(
+        (Savable[]) array.toArray(new Savable[0]),
+        name,
         defVal == null ? null : (Savable[]) defVal.toArray(new Savable[0]));
   }
-
 
   @Override
   public void writeSavableArrayListArray(ArrayList[] objects, String name, ArrayList[] defVal)
@@ -428,24 +429,25 @@ public class JsonOutputCapsule implements OutputCapsule {
     if (objects == null) {
       return;
     }
-
     jsonGenerator.writeFieldName(name);
     jsonGenerator.writeStartArray();
     for (int i = 0; i < objects.length; i++) {
+      ArrayList arrayList = objects[i];
       jsonGenerator.writeStartArray();
-      for (Object o : objects[i]) {
-        if (o == null) {
+      for (int y = 0; y < arrayList.size(); y++) {
+        if (!(arrayList.get(i) instanceof Savable)) {
           continue;
-        } else if (o instanceof Savable) {
-          Savable s = (Savable) o;
-          write(s, s.getClass().getName(), null);
-        } else {
-          throw new ClassCastException("Not a Savable instance: " + o);
         }
+        jsonGenerator.writeStartArray();
+        Savable savable = (Savable) arrayList.get(i);
+        jsonGenerator.writeString(savable.getClass().getName());
+        jsonGenerator.writeStartObject();
+        savable.write(exporter);
+        jsonGenerator.writeEndObject();
+        jsonGenerator.writeEndArray();
       }
       jsonGenerator.writeEndArray();
     }
-
     jsonGenerator.writeEndArray();
   }
 
@@ -659,12 +661,19 @@ public class JsonOutputCapsule implements OutputCapsule {
     if (array == null) {
       return;
     }
+
     jsonGenerator.writeFieldName(name);
-    jsonGenerator.writeStartObject();
-    jsonGenerator.writeNumberField("size", array.size());
-    for (ByteBuffer o : array) {
-      write(o, "ByteBuffer", null);
+    jsonGenerator.writeStartArray();
+    for (int i = 0; i < array.size(); i++) {
+      jsonGenerator.writeStartArray();
+      ByteBuffer buffer = array.get(i);
+      if (buffer.hasArray()) {
+        for (int y = 0; y < buffer.array().length; y++) {
+          jsonGenerator.writeNumber(buffer.array()[y]);
+        }
+      }
+      jsonGenerator.writeEndArray();
     }
-    jsonGenerator.writeEndObject();
+    jsonGenerator.writeEndArray();
   }
 }

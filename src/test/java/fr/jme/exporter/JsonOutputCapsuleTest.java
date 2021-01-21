@@ -428,7 +428,20 @@ class JsonOutputCapsuleTest {
   }
 
   @org.junit.jupiter.api.Test
-  void writeSavableArrayListArray() {}
+  void writeSavableArrayListArray() throws IOException {
+    ArrayList[] myValues = new ArrayList[]{new ArrayList<>(Arrays.asList(new TestSavable(),
+        new TestSavable())), new ArrayList<>(Arrays.asList(new TestSavable(),
+        new TestSavable()))};
+
+    jGenerator.writeStartObject();
+    jsonOutputCapsule.writeSavableArrayListArray(myValues, "myField", null);
+    jGenerator.writeEndObject();
+    jGenerator.close();
+    System.out.println(stringWriter.toString());
+    Assertions.assertEquals(
+        "{\"myField\":[[[\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"myString\"}],[\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"myString\"}]],[[\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"myString\"}],[\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"myString\"}]]]}",
+        stringWriter.toString());
+  }
 
   @org.junit.jupiter.api.Test
   void writeSavableArrayListArray2D() {}
@@ -593,7 +606,24 @@ class JsonOutputCapsuleTest {
   }
 
   @org.junit.jupiter.api.Test
-  void writeByteBufferArrayList() {
+  void writeByteBufferArrayList() throws IOException {
+    ByteBuffer fb1 = ByteBuffer.allocate(3);
+    fb1.put((byte) 1);
+    fb1.put((byte) 2);
+    fb1.put((byte) 3);
+    ByteBuffer fb2 = ByteBuffer.allocate(2);
+    fb2.put((byte) 1);
+    fb2.put((byte) 2);
+
+    ArrayList<ByteBuffer> myValues = new ArrayList<>(Arrays.asList(fb1,
+        fb2));
+
+    jGenerator.writeStartObject();
+    jsonOutputCapsule.writeByteBufferArrayList(myValues, "myField", null);
+    jGenerator.writeEndObject();
+    jGenerator.close();
+    System.out.println(stringWriter.toString());
+    Assertions.assertEquals("{\"myField\":[[1,2,3],[1,2]]}", stringWriter.toString());
   }
 
   @org.junit.jupiter.api.Test

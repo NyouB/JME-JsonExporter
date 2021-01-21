@@ -377,7 +377,20 @@ class JsonInputCapsuleTest {
   }
 
   @Test
-  void readSavableArrayListArray() {
+  void readSavableArrayListArray() throws IOException {
+    String json =
+        "{\"myField\":[[[\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"myString\"}],[\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"myString\"}]],[[\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"myString\"}],[\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"myString\"}]]]}";
+    ArrayList[] expected = new ArrayList[]{new ArrayList<>(Arrays.asList(new TestSavable(),
+        new TestSavable())), new ArrayList<>(Arrays.asList(new TestSavable(),
+        new TestSavable()))};
+    JsonImporter jsonImporter = new JsonImporter(new ByteArrayInputStream(json.getBytes()));
+    JsonInputCapsule jsonInputCapsule = (JsonInputCapsule) jsonImporter.getCapsule(null);
+    ArrayList[] res = jsonInputCapsule.readSavableArrayListArray("myField", null);
+    for (int i = 0; i < expected.length; i++) {
+      for (int y = 0; y < expected[i].size(); y++) {
+        Assertions.assertEquals(expected[i].get(y), res[i].get(y));
+      }
+    }
   }
 
   @Test
@@ -556,7 +569,25 @@ class JsonInputCapsuleTest {
   }
 
   @Test
-  void readByteBufferArrayList() {}
+  void readByteBufferArrayList() throws IOException {
+    String json = "{\"myField\":[[1.1,2.2,3.3],[1.1,2.2]]}";
+    ByteBuffer buffer1 = ByteBuffer.allocate(3);
+    buffer1.put((byte) 1);
+    buffer1.put((byte) 2);
+    buffer1.put((byte) 3);
+    ByteBuffer buffer2 = ByteBuffer.allocate(2);
+    buffer2.put((byte) 1);
+    buffer2.put((byte) 2);
+
+    ArrayList<ByteBuffer> expected = new ArrayList<>(Arrays.asList(buffer1,
+        buffer2));
+    JsonImporter jsonImporter = new JsonImporter(new ByteArrayInputStream(json.getBytes()));
+    JsonInputCapsule jsonInputCapsule = (JsonInputCapsule) jsonImporter.getCapsule(null);
+    List<ByteBuffer> res = jsonInputCapsule.readByteBufferArrayList("myField", null);
+    for (int i = 0; i < expected.size(); i++) {
+      Assertions.assertEquals(expected.get(i), res.get(i));
+    }
+  }
 
   @Test
   void readEnum() throws IOException {

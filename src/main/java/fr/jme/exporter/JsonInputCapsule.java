@@ -580,43 +580,26 @@ public class JsonInputCapsule implements InputCapsule {
 
   public ArrayList<Savable>[] readSavableArrayListArray(String name, ArrayList[] defVal)
       throws IOException {
-    try {
-      Element tmpEl = findChildElement(currentElem, name);
-      if (tmpEl == null) {
-        return defVal;
-      }
-      currentElem = tmpEl;
-
-      String sizeString = tmpEl.getAttribute("size");
-      int requiredSize = (sizeString.length() > 0) ? Integer.parseInt(sizeString) : -1;
-
-      ArrayList<Savable> sal;
-      List<ArrayList<Savable>> savableArrayLists = new ArrayList<ArrayList<Savable>>();
-      int i = -1;
-      while (true) {
-        sal = readSavableArrayList("SavableArrayList_" + ++i, null);
-        if (sal == null && savableArrayLists.size() >= requiredSize) break;
-        savableArrayLists.add(sal);
-      }
-
-      if (requiredSize > -1 && savableArrayLists.size() != requiredSize)
-        throw new IOException(
-            "String array contains wrong element count.  "
-                + "Specified size "
-                + requiredSize
-                + ", data contains "
-                + savableArrayLists.size());
-      currentElem = (Element) tmpEl.getParentNode();
-      return savableArrayLists.toArray(new ArrayList[0]);
-    } catch (IOException ioe) {
-      throw ioe;
-    } catch (NumberFormatException nfe) {
-      IOException io = new IOException(nfe.toString(), nfe);
-      throw io;
-    } catch (DOMException de) {
-      IOException io = new IOException(de.toString(), de);
-      throw io;
+    if (!currentNode.has(name)) {
+      return defVal;
     }
+    JsonNode arrayNode = currentNode.get(name);
+    JsonNode previousNode = currentNode;
+    if (arrayNode == null || arrayNode.size() < 1) {
+      return defVal;
+    }
+    ArrayList<Savable>[] res = new ArrayList[arrayNode.size()];
+    for (int i = 0; i < arrayNode.size(); i++) {
+      JsonNode listNode = arrayNode.get(i);
+      ArrayList<Savable> arrayList = new ArrayList<>();
+      for (int y = 0; y < listNode.size(); y++) {
+        currentNode = listNode.get(0);
+        arrayList.add(readSavableFromCurrentElem(null));
+      }
+      res[i] = arrayList;
+    }
+    currentNode = previousNode;
+    return res;
   }
 
   public ArrayList<Savable>[][] readSavableArrayListArray2D(String name, ArrayList[][] defVal)
