@@ -481,15 +481,20 @@ public class JsonOutputCapsule implements OutputCapsule {
     if (array == null) {
       return;
     }
-    /*
-    Element el = appendElement(name);
-    el.setAttribute(XMLExporter.ATTRIBUTE_SIZE, String.valueOf(array.size()));
-    for (FloatBuffer o : array) {
-      write(o, XMLExporter.ELEMENT_FLOATBUFFER, null);
-    }
-    currentElement = (Element) el.getParentNode();
 
-     */
+    jsonGenerator.writeFieldName(name);
+    jsonGenerator.writeStartArray();
+    for (int i = 0; i < array.size(); i++) {
+      jsonGenerator.writeStartArray();
+      FloatBuffer floatBuffer = array.get(i);
+      if (floatBuffer.hasArray()) {
+        for (int y = 0; y < floatBuffer.array().length; y++) {
+          jsonGenerator.writeNumber(floatBuffer.array()[y]);
+        }
+      }
+      jsonGenerator.writeEndArray();
+    }
+    jsonGenerator.writeEndArray();
   }
 
   @Override

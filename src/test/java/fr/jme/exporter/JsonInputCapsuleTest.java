@@ -17,6 +17,7 @@ import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.List;
@@ -384,7 +385,24 @@ class JsonInputCapsuleTest {
   }
 
   @Test
-  void readFloatBufferArrayList() {
+  void readFloatBufferArrayList() throws IOException {
+    String json = "{\"myField\":[[1.1,2.2,3.3],[1.1,2.2]]}";
+    FloatBuffer fb1 = FloatBuffer.allocate(3);
+    fb1.put(1.1f);
+    fb1.put(2.2f);
+    fb1.put(3.3f);
+    FloatBuffer fb2 = FloatBuffer.allocate(2);
+    fb2.put(1.1f);
+    fb2.put(2.2f);
+
+    ArrayList<FloatBuffer> expected = new ArrayList<>(Arrays.asList(fb1,
+        fb2));
+    JsonImporter jsonImporter = new JsonImporter(new ByteArrayInputStream(json.getBytes()));
+    JsonInputCapsule jsonInputCapsule = (JsonInputCapsule) jsonImporter.getCapsule(null);
+    List<FloatBuffer> res = jsonInputCapsule.readFloatBufferArrayList("myField", null);
+    for (int i = 0; i < expected.size(); i++) {
+      Assertions.assertEquals(expected.get(i), res.get(i));
+    }
   }
 
   @Test

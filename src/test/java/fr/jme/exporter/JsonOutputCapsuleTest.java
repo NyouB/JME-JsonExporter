@@ -434,7 +434,25 @@ class JsonOutputCapsuleTest {
   void writeSavableArrayListArray2D() {}
 
   @org.junit.jupiter.api.Test
-  void writeFloatBufferArrayList() {}
+  void writeFloatBufferArrayList() throws IOException {
+    FloatBuffer fb1 = FloatBuffer.allocate(3);
+    fb1.put(1.1f);
+    fb1.put(2.2f);
+    fb1.put(3.3f);
+    FloatBuffer fb2 = FloatBuffer.allocate(2);
+    fb2.put(1.1f);
+    fb2.put(2.2f);
+
+    ArrayList<FloatBuffer> myValues = new ArrayList<>(Arrays.asList(fb1,
+        fb2));
+
+    jGenerator.writeStartObject();
+    jsonOutputCapsule.writeFloatBufferArrayList(myValues, "myField", null);
+    jGenerator.writeEndObject();
+    jGenerator.close();
+    System.out.println(stringWriter.toString());
+    Assertions.assertEquals("{\"myField\":[[1.1,2.2,3.3],[1.1,2.2]]}", stringWriter.toString());
+  }
 
   @org.junit.jupiter.api.Test
   void writeSavableMap() throws IOException {

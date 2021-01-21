@@ -656,40 +656,20 @@ public class JsonInputCapsule implements InputCapsule {
 
   public ArrayList<FloatBuffer> readFloatBufferArrayList(String name, ArrayList<FloatBuffer> defVal)
       throws IOException {
-    try {
-      Element tmpEl = findChildElement(currentElem, name);
-      if (tmpEl == null) {
-        return defVal;
-      }
-
-      String sizeString = tmpEl.getAttribute("size");
-      ArrayList<FloatBuffer> tmp = new ArrayList<FloatBuffer>();
-      for (currentElem = findFirstChildElement(tmpEl);
-          currentElem != null;
-          currentElem = findNextSiblingElement(currentElem)) {
-        tmp.add(readFloatBuffer(null, null));
-      }
-      if (sizeString.length() > 0) {
-        int requiredSize = Integer.parseInt(sizeString);
-        if (tmp.size() != requiredSize)
-          throw new IOException(
-              "String array contains wrong element count.  "
-                  + "Specified size "
-                  + requiredSize
-                  + ", data contains "
-                  + tmp.size());
-      }
-      currentElem = (Element) tmpEl.getParentNode();
-      return tmp;
-    } catch (IOException ioe) {
-      throw ioe;
-    } catch (NumberFormatException nfe) {
-      IOException io = new IOException(nfe.toString(), nfe);
-      throw io;
-    } catch (DOMException de) {
-      IOException io = new IOException(de.toString(), de);
-      throw io;
+    if (!currentNode.has(name)) {
+      return defVal;
     }
+    JsonNode arrayNode = currentNode.get(name);
+    ArrayList<FloatBuffer> res = new ArrayList<>();
+    for (int i = 0; i < arrayNode.size(); i++) {
+      JsonNode floatArrayNode = arrayNode.get(i);
+      FloatBuffer floatBuffer = FloatBuffer.allocate(floatArrayNode.size());
+      for (int y = 0; y < floatArrayNode.size(); y++) {
+        floatBuffer.put(Float.parseFloat(floatArrayNode.get(y).asText()));
+      }
+      res.add(floatBuffer);
+    }
+    return res;
   }
 
   public Map<? extends Savable, ? extends Savable> readSavableMap(
