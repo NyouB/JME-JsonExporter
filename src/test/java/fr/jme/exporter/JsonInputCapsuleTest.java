@@ -380,9 +380,11 @@ class JsonInputCapsuleTest {
   void readSavableArrayListArray() throws IOException {
     String json =
         "{\"myField\":[[[\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"myString\"}],[\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"myString\"}]],[[\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"myString\"}],[\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"myString\"}]]]}";
-    ArrayList[] expected = new ArrayList[]{new ArrayList<>(Arrays.asList(new TestSavable(),
-        new TestSavable())), new ArrayList<>(Arrays.asList(new TestSavable(),
-        new TestSavable()))};
+    ArrayList[] expected =
+        new ArrayList[]{
+            new ArrayList<>(Arrays.asList(new TestSavable(), new TestSavable())),
+            new ArrayList<>(Arrays.asList(new TestSavable(), new TestSavable()))
+        };
     JsonImporter jsonImporter = new JsonImporter(new ByteArrayInputStream(json.getBytes()));
     JsonInputCapsule jsonInputCapsule = (JsonInputCapsule) jsonImporter.getCapsule(null);
     ArrayList[] res = jsonInputCapsule.readSavableArrayListArray("myField", null);
@@ -394,7 +396,30 @@ class JsonInputCapsuleTest {
   }
 
   @Test
-  void readSavableArrayListArray2D() {
+  void readSavableArrayListArray2D() throws IOException {
+    String json =
+        "{\"myField\":[[[[\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"myString\"}],[\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"myString\"}]],[[\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"myString\"}],[\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"myString\"}]]],[[[\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"myString\"}],[\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"myString\"}]],[[\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"myString\"}],[\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"myString\"}]]]]}";
+    ArrayList[][] expected =
+        new ArrayList[][]{
+            new ArrayList[]{
+                new ArrayList<>(Arrays.asList(new TestSavable(), new TestSavable())),
+                new ArrayList<>(Arrays.asList(new TestSavable(), new TestSavable()))
+            },
+            new ArrayList[]{
+                new ArrayList<>(Arrays.asList(new TestSavable(), new TestSavable())),
+                new ArrayList<>(Arrays.asList(new TestSavable(), new TestSavable()))
+            }
+        };
+    JsonImporter jsonImporter = new JsonImporter(new ByteArrayInputStream(json.getBytes()));
+    JsonInputCapsule jsonInputCapsule = (JsonInputCapsule) jsonImporter.getCapsule(null);
+    ArrayList[][] res = jsonInputCapsule.readSavableArrayListArray2D("myField", null);
+    for (int i = 0; i < expected.length; i++) {
+      for (int y = 0; y < expected[i].length; y++) {
+        for (int z = 0; z < expected[i][y].size(); z++) {
+          Assertions.assertEquals(expected[i][y].get(z), res[i][y].get(z));
+        }
+      }
+    }
   }
 
   @Test
@@ -408,8 +433,7 @@ class JsonInputCapsuleTest {
     fb2.put(1.1f);
     fb2.put(2.2f);
 
-    ArrayList<FloatBuffer> expected = new ArrayList<>(Arrays.asList(fb1,
-        fb2));
+    ArrayList<FloatBuffer> expected = new ArrayList<>(Arrays.asList(fb1, fb2));
     JsonImporter jsonImporter = new JsonImporter(new ByteArrayInputStream(json.getBytes()));
     JsonInputCapsule jsonInputCapsule = (JsonInputCapsule) jsonImporter.getCapsule(null);
     List<FloatBuffer> res = jsonInputCapsule.readFloatBufferArrayList("myField", null);
@@ -579,8 +603,7 @@ class JsonInputCapsuleTest {
     buffer2.put((byte) 1);
     buffer2.put((byte) 2);
 
-    ArrayList<ByteBuffer> expected = new ArrayList<>(Arrays.asList(buffer1,
-        buffer2));
+    ArrayList<ByteBuffer> expected = new ArrayList<>(Arrays.asList(buffer1, buffer2));
     JsonImporter jsonImporter = new JsonImporter(new ByteArrayInputStream(json.getBytes()));
     JsonInputCapsule jsonInputCapsule = (JsonInputCapsule) jsonImporter.getCapsule(null);
     List<ByteBuffer> res = jsonInputCapsule.readByteBufferArrayList("myField", null);

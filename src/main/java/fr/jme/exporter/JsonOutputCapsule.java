@@ -452,26 +452,40 @@ public class JsonOutputCapsule implements OutputCapsule {
   }
 
   @Override
-  public void writeSavableArrayListArray2D(ArrayList[][] value, String name, ArrayList[][] defVal)
+  public void writeSavableArrayListArray2D(ArrayList[][] objects, String name, ArrayList[][] defVal)
       throws IOException {
-    if (value == null) {
-      value = defVal;
+    if (objects == null) {
+      objects = defVal;
     }
-    if (value == null) {
+    if (objects == null) {
       return;
     }
-    /*
-       Element el = appendElement(name);
-       int size = value.length;
-       el.setAttribute(XMLExporter.ATTRIBUTE_SIZE, String.valueOf(size));
+    jsonGenerator.writeFieldName(name);
+    jsonGenerator.writeStartArray();
+    for (int i = 0; i < objects.length; i++) {
+      ArrayList[] arrayListArray = objects[i];
+      jsonGenerator.writeStartArray();
+      for (int y = 0; y < arrayListArray.length; y++) {
+        ArrayList arrayList = arrayListArray[y];
+        jsonGenerator.writeStartArray();
+        for (int z = 0; z < arrayList.size(); z++) {
 
-       for (int i = 0; i < size; i++) {
-         ArrayList[] vi = value[i];
-         writeSavableArrayListArray(vi, "SavableArrayListArray_" + i, null);
-       }
-       currentElement = (Element) el.getParentNode();
-
-    */
+          if (!(arrayList.get(z) instanceof Savable)) {
+            continue;
+          }
+          jsonGenerator.writeStartArray();
+          Savable savable = (Savable) arrayList.get(z);
+          jsonGenerator.writeString(savable.getClass().getName());
+          jsonGenerator.writeStartObject();
+          savable.write(exporter);
+          jsonGenerator.writeEndObject();
+          jsonGenerator.writeEndArray();
+        }
+        jsonGenerator.writeEndArray();
+      }
+      jsonGenerator.writeEndArray();
+    }
+    jsonGenerator.writeEndArray();
   }
 
   @Override

@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.slf4j.Logger;
@@ -593,7 +592,7 @@ public class JsonInputCapsule implements InputCapsule {
       JsonNode listNode = arrayNode.get(i);
       ArrayList<Savable> arrayList = new ArrayList<>();
       for (int y = 0; y < listNode.size(); y++) {
-        currentNode = listNode.get(0);
+        currentNode = listNode.get(y);
         arrayList.add(readSavableFromCurrentElem(null));
       }
       res[i] = arrayList;
@@ -604,37 +603,32 @@ public class JsonInputCapsule implements InputCapsule {
 
   public ArrayList<Savable>[][] readSavableArrayListArray2D(String name, ArrayList[][] defVal)
       throws IOException {
-    try {
-      Element tmpEl = findChildElement(currentElem, name);
-      if (tmpEl == null) {
-        return defVal;
-      }
-      currentElem = tmpEl;
-      String sizeString = tmpEl.getAttribute("size");
-
-      ArrayList<Savable>[] arr;
-      List<ArrayList<Savable>[]> sall = new ArrayList<ArrayList<Savable>[]>();
-      int i = -1;
-      while ((arr = readSavableArrayListArray("SavableArrayListArray_" + ++i, null)) != null)
-        sall.add(arr);
-      if (sizeString.length() > 0) {
-        int requiredSize = Integer.parseInt(sizeString);
-        if (sall.size() != requiredSize)
-          throw new IOException(
-              "String array contains wrong element count.  "
-                  + "Specified size "
-                  + requiredSize
-                  + ", data contains "
-                  + sall.size());
-      }
-      currentElem = (Element) tmpEl.getParentNode();
-      return sall.toArray(new ArrayList[0][]);
-    } catch (IOException ioe) {
-      throw ioe;
-    } catch (Exception e) {
-      IOException io = new IOException(e.toString(), e);
-      throw io;
+    if (!currentNode.has(name)) {
+      return defVal;
     }
+    JsonNode arrayNode = currentNode.get(name);
+    JsonNode previousNode = currentNode;
+    if (arrayNode == null || arrayNode.size() < 1) {
+      return defVal;
+    }
+    ArrayList<Savable>[][] res = new ArrayList[arrayNode.size()][];
+    for (int i = 0; i < arrayNode.size(); i++) {
+      JsonNode jsonArray1 = arrayNode.get(i);
+      ArrayList<Savable>[] array1 = new ArrayList[jsonArray1.size()];
+      for (int y = 0; y < jsonArray1.size(); y++) {
+        JsonNode jsonArray2 = jsonArray1.get(y);
+        ArrayList<Savable> arrayList = new ArrayList<>();
+        for (int z = 0; z < jsonArray2.size(); z++) {
+          currentNode = jsonArray2.get(z);
+          arrayList.add(readSavableFromCurrentElem(null));
+        }
+        array1[y] = arrayList;
+
+      }
+      res[i] = array1;
+    }
+    currentNode = previousNode;
+    return res;
   }
 
   public ArrayList<FloatBuffer> readFloatBufferArrayList(String name, ArrayList<FloatBuffer> defVal)
