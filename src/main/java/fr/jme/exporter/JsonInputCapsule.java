@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 public class JsonInputCapsule implements InputCapsule {
 
@@ -489,7 +488,7 @@ public class JsonInputCapsule implements InputCapsule {
     }
   }
 
-  private Savable readSavableFromCurrentElem(Savable defVal) throws IOException {
+  private Savable readSavableFromCurrentArrayElem(Savable defVal) throws IOException {
     JsonNode previousNode;
     JsonNode fieldsNode = currentNode.get(1);
     String className = currentNode.get(0).asText();
@@ -508,6 +507,17 @@ public class JsonInputCapsule implements InputCapsule {
     }
   }
 
+  private Savable readSavableFromMapElem(String className, Savable defVal) throws IOException {
+    Savable res = null;
+    try {
+      res = SavableClassUtil.fromName(className, null);
+      res.read(importer);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return res;
+  }
+
   public Savable[] readSavableArray(String name, Savable[] defVal) throws IOException {
     if (!currentNode.has(name)) {
       return defVal;
@@ -520,7 +530,7 @@ public class JsonInputCapsule implements InputCapsule {
     Savable[] res = new Savable[arrayNode.size()];
     for (int i = 0; i < arrayNode.size(); i++) {
       currentNode = arrayNode.get(i);
-      res[i] = readSavableFromCurrentElem(null);
+      res[i] = readSavableFromCurrentArrayElem(null);
     }
     currentNode = previousNode;
     return res;
@@ -541,7 +551,7 @@ public class JsonInputCapsule implements InputCapsule {
       currentElem = findFirstChildElement(tmpEl);
       for (int i = 0; i < size_outer; i++) {
         for (int j = 0; j < size_inner; j++) {
-          tmp[i][j] = (readSavableFromCurrentElem(null));
+          tmp[i][j] = (readSavableFromCurrentArrayElem(null));
           if (i == size_outer - 1 && j == size_inner - 1) {
             break;
           }
@@ -571,7 +581,7 @@ public class JsonInputCapsule implements InputCapsule {
     ArrayList<Savable> res = new ArrayList<>();
     for (int i = 0; i < arrayNode.size(); i++) {
       currentNode = arrayNode.get(i);
-      res.add(readSavableFromCurrentElem(null));
+      res.add(readSavableFromCurrentArrayElem(null));
     }
     currentNode = previousNode;
     return res;
@@ -593,7 +603,7 @@ public class JsonInputCapsule implements InputCapsule {
       ArrayList<Savable> arrayList = new ArrayList<>();
       for (int y = 0; y < listNode.size(); y++) {
         currentNode = listNode.get(y);
-        arrayList.add(readSavableFromCurrentElem(null));
+        arrayList.add(readSavableFromCurrentArrayElem(null));
       }
       res[i] = arrayList;
     }
@@ -620,7 +630,7 @@ public class JsonInputCapsule implements InputCapsule {
         ArrayList<Savable> arrayList = new ArrayList<>();
         for (int z = 0; z < jsonArray2.size(); z++) {
           currentNode = jsonArray2.get(z);
-          arrayList.add(readSavableFromCurrentElem(null));
+          arrayList.add(readSavableFromCurrentArrayElem(null));
         }
         array1[y] = arrayList;
 
@@ -651,26 +661,37 @@ public class JsonInputCapsule implements InputCapsule {
 
   public Map<? extends Savable, ? extends Savable> readSavableMap(
       String name, Map<? extends Savable, ? extends Savable> defVal) throws IOException {
-    Map<Savable, Savable> ret;
-    Element tempEl;
-
-    if (name != null) {
-      tempEl = findChildElement(currentElem, name);
-    } else {
-      tempEl = currentElem;
+    if (!currentNode.has(name)) {
+      return defVal;
     }
-    ret = new HashMap<Savable, Savable>();
 
-    NodeList nodes = tempEl.getChildNodes();
-    for (int i = 0; i < nodes.getLength(); i++) {
-      Node n = nodes.item(i);
-      if (n instanceof Element && n.getNodeName().equals("MapEntry")) {
-        Element elem = (Element) n;
-        currentElem = elem;
-      }
+    JsonNode previousNode = currentNode;
+
+    // the whole map object
+    currentNode = currentNode.get(name);
+    if (currentNode == null || currentNode.size() < 1) {
+      currentNode = previousNode;
+      return new HashMap<>();
     }
-    currentElem = (Element) tempEl.getParentNode();
-    return ret;
+    Map<Savable, Savable> res = new HashMap<>();
+
+    // each entry in a json map is a field object
+    Iterator<JsonNode> list = currentNode.elements();
+    while (list.hasNext()) {
+      JsonNode keyNode = list.next();
+      // each object is serialize with an array. The first item is the classname and the second,
+      // the value
+      currentNode = list.next();
+      Savable keySavable = readSavableFromMapElem(keyNode.asText(), null);
+
+      JsonNode valueNode = list.next();
+      currentNode = list.next();
+      Savable valueSavable = readSavableFromMapElem(valueNode.asText(), null);
+      res.put(keySavable, valueSavable);
+
+    }
+    currentNode = previousNode;
+    return res;
   }
 
   public Map<String, ? extends Savable> readStringSavableMap(

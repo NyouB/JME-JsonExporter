@@ -485,26 +485,17 @@ class JsonOutputCapsuleTest {
 
   @org.junit.jupiter.api.Test
   void writeSavableMap() throws IOException {
-
-    MaterialDef materialDef = new MaterialDef(new DesktopAssetManager(), "matDefName");
-    materialDef.setAssetName("assetName");
-    Material value = new Material(materialDef);
-    value.getAdditionalRenderState().setBlendEquation(BlendEquation.Add);
-    value.getAdditionalRenderState().setColorWrite(true);
-    value.getAdditionalRenderState().setBlendEquationAlpha(BlendEquationAlpha.InheritColor);
-    value.getAdditionalRenderState().setDepthTest(true);
-    value.getAdditionalRenderState().setBlendMode(BlendMode.Additive);
-
-    Map<String, Savable> savableMap = new HashMap<>();
-    savableMap.put("key1", value);
-    savableMap.put("key2", new LightProbe());
+    Map<TestSavable, Savable> savableMap = new HashMap<>();
+    savableMap.put(new TestSavable("savableKey1"), new TestSavable("randomValue"));
+    savableMap.put(new TestSavable("savableKey2"), new LightProbe());
+    savableMap.put(new TestSavable("savableKey2"), new TestSavable("savablevalue"));
     jGenerator.writeStartObject();
-    jsonOutputCapsule.writeStringSavableMap(savableMap, "myField", new HashMap<>());
+    jsonOutputCapsule.writeSavableMap(savableMap, "myField", new HashMap<>());
     jGenerator.writeEndObject();
     jGenerator.close();
     System.out.println(stringWriter.toString());
     Assertions.assertEquals(
-        "{\"myField\":{\"key1\":[\"com.jme3.material.Material\",{\"material_def\":\"assetName\",\"render_state\":[\"com.jme3.material.RenderState\",{\"pointSprite\":true,\"wireframe\":false,\"cullMode\":\"Back\",\"depthWrite\":true,\"depthTest\":true,\"colorWrite\":true,\"blendMode\":\"Additive\",\"offsetEnabled\":false,\"offsetFactor\":0.0,\"offsetUnits\":0.0,\"stencilTest\":false,\"frontStencilStencilFailOperation\":\"Keep\",\"frontStencilDepthFailOperation\":\"Keep\",\"frontStencilDepthPassOperation\":\"Keep\",\"frontStencilStencilFailOperation\":\"Keep\",\"backStencilDepthFailOperation\":\"Keep\",\"backStencilDepthPassOperation\":\"Keep\",\"frontStencilFunction\":\"Always\",\"backStencilFunction\":\"Always\",\"blendEquation\":\"Add\",\"blendEquationAlpha\":\"InheritColor\",\"depthFunc\":\"LessOrEqual\",\"lineWidth\":1.0,\"sfactorRGB\":\"One\",\"dfactorRGB\":\"One\",\"sfactorAlpha\":\"One\",\"dfactorAlpha\":\"One\",\"applyWireFrame\":false,\"applyCullMode\":false,\"applyDepthWrite\":false,\"applyDepthTest\":true,\"applyColorWrite\":true,\"applyBlendMode\":true,\"applyPolyOffset\":false,\"applyDepthFunc\":false,\"applyLineWidth\":false}],\"is_transparent\":false,\"parameters\":{}}],\"key2\":[\"com.jme3.light.LightProbe\",{\"color\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"enabled\":true,\"position\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"area\":[\"com.jme3.light.SphereProbeArea\",{\"center\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"radius\":1.0}],\"ready\":false,\"nbMipMaps\":0}]}}",
+        "{\"myField\":[\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"savableKey2\"},\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"savablevalue\"},\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"savableKey1\"},\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"randomValue\"}]}",
         stringWriter.toString());
   }
 

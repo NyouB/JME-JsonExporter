@@ -20,6 +20,10 @@ public class TestSavable implements Savable {
   public TestSavable() {
   }
 
+  public TestSavable(String str) {
+    this.myString = str;
+  }
+
   @Override
   public void write(JmeExporter ex) throws IOException {
     OutputCapsule caps = ex.getCapsule(null);

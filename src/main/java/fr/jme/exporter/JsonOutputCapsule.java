@@ -526,22 +526,25 @@ public class JsonOutputCapsule implements OutputCapsule {
       return;
     }
 
-    /*
-    Element stringMap = appendElement(name);
+    jsonGenerator.writeFieldName(name);
+    Iterator<? extends Map.Entry<? extends Savable, ? extends Savable>> entryIterator = map
+        .entrySet().iterator();
+    jsonGenerator.writeStartArray();
+    while (entryIterator.hasNext()) {
+      Map.Entry<? extends Savable, ? extends Savable> entry = entryIterator.next();
+      Savable key = entry.getKey();
+      jsonGenerator.writeString(key.getClass().getCanonicalName());
+      jsonGenerator.writeStartObject();
+      key.write(exporter);
+      jsonGenerator.writeEndObject();
+      Savable value = entry.getValue();
+      jsonGenerator.writeString(value.getClass().getCanonicalName());
+      jsonGenerator.writeStartObject();
+      value.write(exporter);
+      jsonGenerator.writeEndObject();
 
-    Iterator<? extends Savable> keyIterator = map.keySet().iterator();
-    while (keyIterator.hasNext()) {
-      Savable key = keyIterator.next();
-      Element mapEntry = appendElement(XMLExporter.ELEMENT_MAPENTRY);
-      write(key, XMLExporter.ELEMENT_KEY, null);
-      Savable value = map.get(key);
-      write(value, XMLExporter.ELEMENT_VALUE, null);
-      currentElement = stringMap;
     }
-
-    currentElement = (Element) stringMap.getParentNode();
-
-     */
+    jsonGenerator.writeEndArray();
   }
 
   @Override

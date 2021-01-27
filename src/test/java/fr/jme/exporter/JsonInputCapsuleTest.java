@@ -20,6 +20,7 @@ import java.nio.ShortBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Assertions;
@@ -443,7 +444,24 @@ class JsonInputCapsuleTest {
   }
 
   @Test
-  void readSavableMap() {
+  void readSavableMap() throws IOException {
+    String json =
+        "{\"myField\":[\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"savableKey2\"},\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"savablevalue\"},\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"savableKey1\"},\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"randomValue\"}]}";
+    Map<TestSavable, Savable> expected = new HashMap<>();
+    expected.put(new TestSavable("savableKey1"), new TestSavable("randomValue"));
+    expected.put(new TestSavable("savableKey2"), new LightProbe());
+    expected.put(new TestSavable("savableKey2"), new TestSavable("savablevalue"));
+
+    JsonImporter importer =
+        new JsonImporter(new ByteArrayInputStream(json.getBytes()), TEST_ASSET_MANAGER);
+    JsonInputCapsule jsonInputCapsule = (JsonInputCapsule) importer.getCapsule(null);
+    Map<? extends Savable, ? extends Savable> res = jsonInputCapsule
+        .readSavableMap("myField", null);
+    Assertions.assertEquals(2, res.size());
+    Assertions
+        .assertEquals(new TestSavable("randomValue"), res.get(new TestSavable("savableKey1")));
+    Assertions
+        .assertEquals(new TestSavable("savablevalue"), res.get(new TestSavable("savableKey2")));
   }
 
   @Test
