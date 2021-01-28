@@ -11,8 +11,6 @@ import com.jme3.material.RenderState.BlendEquation;
 import com.jme3.material.RenderState.BlendEquationAlpha;
 import com.jme3.material.RenderState.BlendMode;
 import com.jme3.material.RenderState.TestFunction;
-import com.jme3.math.Vector3f;
-import com.jme3.scene.debug.Arrow;
 import com.jme3.util.IntMap;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -71,8 +69,9 @@ class JsonOutputCapsuleTest {
 
   @Test
   void writeByteArray2D() throws IOException {
-    byte[][] myValues = new byte[][] {new byte[] {1, 2}, new byte[] {3, 4, 5}, new byte[] {6, 7, 8}};
-    byte[][] defVal = new byte[][] {new byte[] {1, 2}, new byte[] {3, 4, 5}, new byte[] {6, 7, 8}};
+    byte[][] myValues =
+        new byte[][]{new byte[]{1, 2}, new byte[]{3, 4, 5}, new byte[]{6, 7, 8}};
+    byte[][] defVal = new byte[][]{new byte[]{1, 2}, new byte[]{3, 4, 5}, new byte[]{6, 7, 8}};
     jGenerator.writeStartObject();
     jsonOutputCapsule.write(myValues, "myValues", defVal);
     jGenerator.writeEndObject();
@@ -106,8 +105,8 @@ class JsonOutputCapsuleTest {
 
   @org.junit.jupiter.api.Test
   void writeIntArray2D() throws IOException {
-    int[][] myValues = new int[][] {new int[] {1, 2, 3}, new int[] { -5, 6, 7, 8}};
-    int[][] defVal = new int[][] {new int[] {1, 2, 3}, new int[] { -5, 6, 7, 8}};
+    int[][] myValues = new int[][]{new int[]{1, 2, 3}, new int[]{-5, 6, 7, 8}};
+    int[][] defVal = new int[][]{new int[]{1, 2, 3}, new int[]{-5, 6, 7, 8}};
 
     jGenerator.writeStartObject();
     jsonOutputCapsule.write(myValues, "myField", defVal);
@@ -142,8 +141,8 @@ class JsonOutputCapsuleTest {
 
   @org.junit.jupiter.api.Test
   void writeFloatArray2D() throws IOException {
-    float[][] myValues = new float[][] {new float[] {1.1f, 2.2f, 3.3f}, new float[] { -5.5f, 6.6f}};
-    float[][] defVal = new float[][] {new float[] {1, 2, 3}, new float[] { -5, 6, 7, 8}};
+    float[][] myValues = new float[][]{new float[]{1.1f, 2.2f, 3.3f}, new float[]{-5.5f, 6.6f}};
+    float[][] defVal = new float[][]{new float[]{1, 2, 3}, new float[]{-5, 6, 7, 8}};
 
     jGenerator.writeStartObject();
     jsonOutputCapsule.write(myValues, "myField", defVal);
@@ -178,16 +177,15 @@ class JsonOutputCapsuleTest {
 
   @org.junit.jupiter.api.Test
   void writeDoubleArray2D() throws IOException {
-    double[][] myValues = new double[][] {new double[] {1.1, 2.2, 3.3}, new double[] { -5.5, 6.6}};
-    double[][] defVal = new double[][] {new double[] {1, 2, 3}, new double[] { -5, 6, 7, 8}};
+    double[][] myValues = new double[][]{new double[]{1.1, 2.2, 3.3}, new double[]{-5.5, 6.6}};
+    double[][] defVal = new double[][]{new double[]{1, 2, 3}, new double[]{-5, 6, 7, 8}};
 
     jGenerator.writeStartObject();
     jsonOutputCapsule.write(myValues, "myField", defVal);
     jGenerator.writeEndObject();
     jGenerator.close();
     System.out.println(stringWriter.toString());
-    Assertions.assertEquals(
-        "{\"myField\":[[1.1,2.2,3.3],[-5.5,6.6]]}", stringWriter.toString());
+    Assertions.assertEquals("{\"myField\":[[1.1,2.2,3.3],[-5.5,6.6]]}", stringWriter.toString());
   }
 
   @org.junit.jupiter.api.Test
@@ -215,8 +213,8 @@ class JsonOutputCapsuleTest {
 
   @org.junit.jupiter.api.Test
   void writeLongArray2D() throws IOException {
-    long[][] myValues = new long[][] {new long[] {1, 2, 3}, new long[] { -5, 6, 7, 8}};
-    long[][] defVal = new long[][] {new long[] {1, 2, 3}, new long[] { -5, 6, 7, 8}};
+    long[][] myValues = new long[][]{new long[]{1, 2, 3}, new long[]{-5, 6, 7, 8}};
+    long[][] defVal = new long[][]{new long[]{1, 2, 3}, new long[]{-5, 6, 7, 8}};
 
     jGenerator.writeStartObject();
     jsonOutputCapsule.write(myValues, "myField", defVal);
@@ -251,8 +249,8 @@ class JsonOutputCapsuleTest {
 
   @org.junit.jupiter.api.Test
   void writeShortArray2D() throws IOException {
-    short[][] myValues = new short[][] {new short[] {1, 2, 3}, new short[] { -5, 6, 7, 8}};
-    short[][] defVal = new short[][] {new short[] {1, 2, 3}, new short[] { -5, 6, 7, 8}};
+    short[][] myValues = new short[][]{new short[]{1, 2, 3}, new short[]{-5, 6, 7, 8}};
+    short[][] defVal = new short[][]{new short[]{1, 2, 3}, new short[]{-5, 6, 7, 8}};
 
     jGenerator.writeStartObject();
     jsonOutputCapsule.write(myValues, "myField", defVal);
@@ -288,15 +286,20 @@ class JsonOutputCapsuleTest {
 
   @org.junit.jupiter.api.Test
   void writeBooleanArray2D() throws IOException {
-    boolean[][] myValues = new boolean[][] {new boolean[] {true, false, true}, new boolean[] { true, true, true, false}};
-    boolean[][] defVal = new boolean[][] {new boolean[] {true, true, true}, new boolean[] { true, true, true, true}};
+    boolean[][] myValues =
+        new boolean[][]{
+            new boolean[]{true, false, true}, new boolean[]{true, true, true, false}
+        };
+    boolean[][] defVal =
+        new boolean[][]{new boolean[]{true, true, true}, new boolean[]{true, true, true, true}};
 
     jGenerator.writeStartObject();
     jsonOutputCapsule.write(myValues, "myField", defVal);
     jGenerator.writeEndObject();
     jGenerator.close();
     System.out.println(stringWriter.toString());
-    Assertions.assertEquals("{\"myField\":[[true,false,true],[true,true,true,false]]}", stringWriter.toString());
+    Assertions.assertEquals(
+        "{\"myField\":[[true,false,true],[true,true,true,false]]}", stringWriter.toString());
   }
 
   @org.junit.jupiter.api.Test
@@ -324,8 +327,12 @@ class JsonOutputCapsuleTest {
 
   @org.junit.jupiter.api.Test
   void writeStringArray2D() throws IOException {
-    String[][] myValues = new String[][] {new String[] {"value1", "value2"}, new String[] { "value3", "value4"}};
-    String[][] defVal = new String[][] {new String[] {"value1", "value2", "value3"}, new String[] { "value3", "value4", "value5"}};
+    String[][] myValues =
+        new String[][]{new String[]{"value1", "value2"}, new String[]{"value3", "value4"}};
+    String[][] defVal =
+        new String[][]{
+            new String[]{"value1", "value2", "value3"}, new String[]{"value3", "value4", "value5"}
+        };
 
     jGenerator.writeStartObject();
     jsonOutputCapsule.write(myValues, "myField", defVal);
@@ -333,8 +340,7 @@ class JsonOutputCapsuleTest {
     jGenerator.close();
     System.out.println(stringWriter.toString());
     Assertions.assertEquals(
-        "{\"myField\":[[\"value1\",\"value2\"],[\"value3\",\"value4\"]]}",
-        stringWriter.toString());
+        "{\"myField\":[[\"value1\",\"value2\"],[\"value3\",\"value4\"]]}", stringWriter.toString());
   }
 
   @org.junit.jupiter.api.Test
@@ -393,29 +399,26 @@ class JsonOutputCapsuleTest {
 
   @org.junit.jupiter.api.Test
   void writeSavableArray2D() throws IOException {
-    Arrow arrow = new Arrow(new Vector3f(1, 2, 3));
-    Arrow arrow2 = new Arrow(new Vector3f(1, 2, 3));
-    Arrow arrow3 = new Arrow(new Vector3f(1, 2, 3));
-    Arrow arrow4 = new Arrow(new Vector3f(1, 2, 3));
-    Arrow arrow5 = new Arrow(new Vector3f(1, 2, 3));
-    Savable[][] myValues = new Savable[][]{new Savable[]{arrow, arrow2},
-        new Savable[]{arrow3, arrow4}};
-    Savable[][] defVal = new Savable[][]{new Savable[]{arrow5}, new Savable[]{}};
+    Savable[][] myValues =
+        new Savable[][]{
+            new Savable[]{new TestSavable(), new TestSavable()},
+            new Savable[]{new TestSavable(), new TestSavable()}
+        };
 
     jGenerator.writeStartObject();
-    jsonOutputCapsule.write(myValues, "myField", defVal);
+    jsonOutputCapsule.write(myValues, "myField", null);
     jGenerator.writeEndObject();
     jGenerator.close();
     System.out.println(stringWriter.toString());
     Assertions.assertEquals(
-        "{\"myField\":[[[\"com.jme3.scene.debug.Arrow\",{\"modelBound\":[\"com.jme3.bounding.BoundingBox\",{\"center\":[\"com.jme3.math.Vector3f\",{\"x\":0.53874123,\"y\":1.0,\"z\":1.5000001}],\"xExtent\":0.53874123,\"yExtent\":1.0,\"zExtent\":1.5000001}],\"vertCount\":6,\"elementCount\":5,\"instanceCount\":1,\"max_num_weights\":-1,\"mode\":\"Lines\",\"pointSize\":1.0,\"buffers\":{\"0\":[\"com.jme3.scene.VertexBuffer\",{\"components\":3,\"usage\":\"Dynamic\",\"buffer_type\":\"Position\",\"format\":\"Float\",\"normalized\":false,\"offset\":0,\"stride\":0,\"instanceSpan\":0,\"dataFloat\":[]}],\"9\":[\"com.jme3.scene.VertexBuffer\",{\"components\":2,\"usage\":\"Dynamic\",\"buffer_type\":\"Index\",\"format\":\"UnsignedShort\",\"normalized\":false,\"offset\":0,\"stride\":0,\"instanceSpan\":0,\"dataUnsignedShort\":[]}]}}],[\"com.jme3.scene.debug.Arrow\",{\"modelBound\":[\"com.jme3.bounding.BoundingBox\",{\"center\":[\"com.jme3.math.Vector3f\",{\"x\":0.53874123,\"y\":1.0,\"z\":1.5000001}],\"xExtent\":0.53874123,\"yExtent\":1.0,\"zExtent\":1.5000001}],\"vertCount\":6,\"elementCount\":5,\"instanceCount\":1,\"max_num_weights\":-1,\"mode\":\"Lines\",\"pointSize\":1.0,\"buffers\":{\"0\":[\"com.jme3.scene.VertexBuffer\",{\"components\":3,\"usage\":\"Dynamic\",\"buffer_type\":\"Position\",\"format\":\"Float\",\"normalized\":false,\"offset\":0,\"stride\":0,\"instanceSpan\":0,\"dataFloat\":[]}],\"9\":[\"com.jme3.scene.VertexBuffer\",{\"components\":2,\"usage\":\"Dynamic\",\"buffer_type\":\"Index\",\"format\":\"UnsignedShort\",\"normalized\":false,\"offset\":0,\"stride\":0,\"instanceSpan\":0,\"dataUnsignedShort\":[]}]}}]],[[\"com.jme3.scene.debug.Arrow\",{\"modelBound\":[\"com.jme3.bounding.BoundingBox\",{\"center\":[\"com.jme3.math.Vector3f\",{\"x\":0.53874123,\"y\":1.0,\"z\":1.5000001}],\"xExtent\":0.53874123,\"yExtent\":1.0,\"zExtent\":1.5000001}],\"vertCount\":6,\"elementCount\":5,\"instanceCount\":1,\"max_num_weights\":-1,\"mode\":\"Lines\",\"pointSize\":1.0,\"buffers\":{\"0\":[\"com.jme3.scene.VertexBuffer\",{\"components\":3,\"usage\":\"Dynamic\",\"buffer_type\":\"Position\",\"format\":\"Float\",\"normalized\":false,\"offset\":0,\"stride\":0,\"instanceSpan\":0,\"dataFloat\":[]}],\"9\":[\"com.jme3.scene.VertexBuffer\",{\"components\":2,\"usage\":\"Dynamic\",\"buffer_type\":\"Index\",\"format\":\"UnsignedShort\",\"normalized\":false,\"offset\":0,\"stride\":0,\"instanceSpan\":0,\"dataUnsignedShort\":[]}]}}],[\"com.jme3.scene.debug.Arrow\",{\"modelBound\":[\"com.jme3.bounding.BoundingBox\",{\"center\":[\"com.jme3.math.Vector3f\",{\"x\":0.53874123,\"y\":1.0,\"z\":1.5000001}],\"xExtent\":0.53874123,\"yExtent\":1.0,\"zExtent\":1.5000001}],\"vertCount\":6,\"elementCount\":5,\"instanceCount\":1,\"max_num_weights\":-1,\"mode\":\"Lines\",\"pointSize\":1.0,\"buffers\":{\"0\":[\"com.jme3.scene.VertexBuffer\",{\"components\":3,\"usage\":\"Dynamic\",\"buffer_type\":\"Position\",\"format\":\"Float\",\"normalized\":false,\"offset\":0,\"stride\":0,\"instanceSpan\":0,\"dataFloat\":[]}],\"9\":[\"com.jme3.scene.VertexBuffer\",{\"components\":2,\"usage\":\"Dynamic\",\"buffer_type\":\"Index\",\"format\":\"UnsignedShort\",\"normalized\":false,\"offset\":0,\"stride\":0,\"instanceSpan\":0,\"dataUnsignedShort\":[]}]}}]]]}",
+        "{\"myField\":[[[\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"myString\"}],[\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"myString\"}]],[[\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"myString\"}],[\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"myString\"}]]]}",
         stringWriter.toString());
   }
 
   @org.junit.jupiter.api.Test
   void writeSavableArrayList() throws IOException {
-    ArrayList<Savable> myValues = new ArrayList<>(Arrays.asList(new TestSavable(),
-        new TestSavable()));
+    ArrayList<Savable> myValues =
+        new ArrayList<>(Arrays.asList(new TestSavable(), new TestSavable()));
 
     jGenerator.writeStartObject();
     jsonOutputCapsule.writeSavableArrayList(myValues, "myField", null);
@@ -429,9 +432,11 @@ class JsonOutputCapsuleTest {
 
   @org.junit.jupiter.api.Test
   void writeSavableArrayListArray() throws IOException {
-    ArrayList[] myValues = new ArrayList[]{new ArrayList<>(Arrays.asList(new TestSavable(),
-        new TestSavable())), new ArrayList<>(Arrays.asList(new TestSavable(),
-        new TestSavable()))};
+    ArrayList[] myValues =
+        new ArrayList[]{
+            new ArrayList<>(Arrays.asList(new TestSavable(), new TestSavable())),
+            new ArrayList<>(Arrays.asList(new TestSavable(), new TestSavable()))
+        };
 
     jGenerator.writeStartObject();
     jsonOutputCapsule.writeSavableArrayListArray(myValues, "myField", null);
@@ -445,12 +450,17 @@ class JsonOutputCapsuleTest {
 
   @org.junit.jupiter.api.Test
   void writeSavableArrayListArray2D() throws IOException {
-    ArrayList[][] myValues = new ArrayList[][]{
-        new ArrayList[]{new ArrayList<>(Arrays.asList(new TestSavable(),
-            new TestSavable())), new ArrayList<>(Arrays.asList(new TestSavable(),
-            new TestSavable()))}, new ArrayList[]{new ArrayList<>(Arrays.asList(new TestSavable(),
-        new TestSavable())), new ArrayList<>(Arrays.asList(new TestSavable(),
-        new TestSavable()))}};
+    ArrayList[][] myValues =
+        new ArrayList[][]{
+            new ArrayList[]{
+                new ArrayList<>(Arrays.asList(new TestSavable(), new TestSavable())),
+                new ArrayList<>(Arrays.asList(new TestSavable(), new TestSavable()))
+            },
+            new ArrayList[]{
+                new ArrayList<>(Arrays.asList(new TestSavable(), new TestSavable())),
+                new ArrayList<>(Arrays.asList(new TestSavable(), new TestSavable()))
+            }
+        };
 
     jGenerator.writeStartObject();
     jsonOutputCapsule.writeSavableArrayListArray2D(myValues, "myField", null);
@@ -472,8 +482,7 @@ class JsonOutputCapsuleTest {
     fb2.put(1.1f);
     fb2.put(2.2f);
 
-    ArrayList<FloatBuffer> myValues = new ArrayList<>(Arrays.asList(fb1,
-        fb2));
+    ArrayList<FloatBuffer> myValues = new ArrayList<>(Arrays.asList(fb1, fb2));
 
     jGenerator.writeStartObject();
     jsonOutputCapsule.writeFloatBufferArrayList(myValues, "myField", null);
@@ -622,8 +631,7 @@ class JsonOutputCapsuleTest {
     fb2.put((byte) 1);
     fb2.put((byte) 2);
 
-    ArrayList<ByteBuffer> myValues = new ArrayList<>(Arrays.asList(fb1,
-        fb2));
+    ArrayList<ByteBuffer> myValues = new ArrayList<>(Arrays.asList(fb1, fb2));
 
     jGenerator.writeStartObject();
     jsonOutputCapsule.writeByteBufferArrayList(myValues, "myField", null);

@@ -9,7 +9,6 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import java.io.IOException;
 
-
 public class TestSavable implements Savable {
 
   Vector3f vector3f = new Vector3f();
@@ -40,7 +39,6 @@ public class TestSavable implements Savable {
     colorRGBA = (ColorRGBA) inputCapsule.readSavable("colorRGBA", null);
     myInt = inputCapsule.readInt("myInt", 0);
     myString = inputCapsule.readString("myString", null);
-
   }
 
   @Override

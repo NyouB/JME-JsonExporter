@@ -1,14 +1,12 @@
 package fr.jme.exporter;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.jme3.asset.AssetInfo;
 import com.jme3.asset.AssetManager;
 import com.jme3.asset.DesktopAssetManager;
-import com.jme3.asset.plugins.ClasspathLocator;
-import com.jme3.asset.plugins.FileLocator;
 import com.jme3.export.InputCapsule;
 import com.jme3.export.JmeImporter;
 import com.jme3.export.Savable;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -25,6 +23,10 @@ public class JsonImporter implements JmeImporter {
 
   public JsonImporter(JsonInputCapsule jsonInputCapsule) {
     this.jsonInputCapsule = jsonInputCapsule;
+  }
+
+  public JsonImporter(JsonNode jsonNode) {
+    this.jsonInputCapsule = new JsonInputCapsule(jsonNode, this);
   }
 
   public JsonImporter(InputStream inputStream) throws IOException {

@@ -21,9 +21,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.DOMException;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 
 public class JsonInputCapsule implements InputCapsule {
 
@@ -34,11 +32,16 @@ public class JsonInputCapsule implements InputCapsule {
   private JsonNode currentNode = null;
 
   private Element currentElem;
-  private final boolean isAtRoot = true;
-  private final Map<String, Savable> referencedSavables = new HashMap<String, Savable>();
 
-  private int[] classHierarchyVersions;
-  private Savable savable;
+  public JsonInputCapsule(JsonNode rootNode, JsonImporter importer) {
+    this.rootNode = rootNode;
+    currentNode = this.rootNode;
+    this.importer = importer;
+    if (rootNode.has("format_version")) {
+      String version = rootNode.get("format_version").textValue();
+      importer.formatVersion = version.equals("") ? 0 : Integer.parseInt(version);
+    }
+  }
 
   public JsonInputCapsule(InputStream stream, JsonImporter importer) throws IOException {
     rootNode = OBJECT_MAPPER.readTree(stream);
@@ -60,51 +63,9 @@ public class JsonInputCapsule implements InputCapsule {
     }
   }
 
-  public int getSavableVersion(Class<? extends Savable> desiredClass) {
-    if (classHierarchyVersions != null) {
-      return SavableClassUtil.getSavedSavableVersion(
-          savable, desiredClass, classHierarchyVersions, importer.getFormatVersion());
-    } else {
-      return 0;
-    }
-  }
-
-  private static String decodeString(String s) {
-    if (s == null) {
-      return null;
-    }
-    s = s.replaceAll("\\&quot;", "\"").replaceAll("\\&lt;", "<").replaceAll("\\&amp;", "&");
-    return s;
-  }
-
-  private Element findFirstChildElement(Element parent) {
-    Node ret = parent.getFirstChild();
-    while (ret != null && (!(ret instanceof Element))) {
-      ret = ret.getNextSibling();
-    }
-    return (Element) ret;
-  }
-
-  private Element findChildElement(Element parent, String name) {
-    if (parent == null) {
-      return null;
-    }
-    Node ret = parent.getFirstChild();
-    while (ret != null && (!(ret instanceof Element) || !ret.getNodeName().equals(name))) {
-      ret = ret.getNextSibling();
-    }
-    return (Element) ret;
-  }
-
-  private Element findNextSiblingElement(Element current) {
-    Node ret = current.getNextSibling();
-    while (ret != null) {
-      if (ret instanceof Element) {
-        return (Element) ret;
-      }
-      ret = ret.getNextSibling();
-    }
-    return null;
+  @Override
+  public int getSavableVersion(Class<? extends Savable> clazz) {
+    return 0;
   }
 
   public byte readByte(String name, byte defVal) throws IOException {
@@ -112,7 +73,9 @@ public class JsonInputCapsule implements InputCapsule {
       return defVal;
     }
     String tmpString = currentNode.get(name).asText();
-    if (tmpString == null || tmpString.length() < 1) return defVal;
+    if (tmpString == null || tmpString.length() < 1) {
+      return defVal;
+    }
     try {
       return Byte.parseByte(tmpString);
     } catch (NumberFormatException nfe) {
@@ -537,36 +500,26 @@ public class JsonInputCapsule implements InputCapsule {
   }
 
   public Savable[][] readSavableArray2D(String name, Savable[][] defVal) throws IOException {
-    Savable[][] ret = defVal;
-    try {
-      Element tmpEl = findChildElement(currentElem, name);
-      if (tmpEl == null) {
-        return defVal;
-      }
-
-      int size_outer = Integer.parseInt(tmpEl.getAttribute("size_outer"));
-      int size_inner = Integer.parseInt(tmpEl.getAttribute("size_outer"));
-
-      Savable[][] tmp = new Savable[size_outer][size_inner];
-      currentElem = findFirstChildElement(tmpEl);
-      for (int i = 0; i < size_outer; i++) {
-        for (int j = 0; j < size_inner; j++) {
-          tmp[i][j] = (readSavableFromCurrentArrayElem(null));
-          if (i == size_outer - 1 && j == size_inner - 1) {
-            break;
-          }
-          currentElem = findNextSiblingElement(currentElem);
-        }
-      }
-      ret = tmp;
-      currentElem = (Element) tmpEl.getParentNode();
-      return ret;
-    } catch (IOException ioe) {
-      throw ioe;
-    } catch (Exception e) {
-      IOException io = new IOException(e.toString(), e);
-      throw io;
+    if (!currentNode.has(name)) {
+      return defVal;
     }
+    JsonNode arrayNode = currentNode.get(name);
+    JsonNode previousNode = currentNode;
+    if (arrayNode == null || arrayNode.size() < 1) {
+      return defVal;
+    }
+    Savable[][] res = new Savable[arrayNode.size()][];
+    for (int i = 0; i < arrayNode.size(); i++) {
+      JsonNode nestedArray = arrayNode.get(i);
+      Savable[] nestedSavables = new Savable[nestedArray.size()];
+      for (int y = 0; y < nestedArray.size(); y++) {
+        currentNode = nestedArray.get(y);
+        nestedSavables[y] = readSavableFromCurrentArrayElem(null);
+      }
+      res[i] = nestedSavables;
+    }
+    currentNode = previousNode;
+    return res;
   }
 
   public ArrayList<Savable> readSavableArrayList(String name, ArrayList defVal) throws IOException {
@@ -633,7 +586,6 @@ public class JsonInputCapsule implements InputCapsule {
           arrayList.add(readSavableFromCurrentArrayElem(null));
         }
         array1[y] = arrayList;
-
       }
       res[i] = array1;
     }
@@ -688,7 +640,6 @@ public class JsonInputCapsule implements InputCapsule {
       currentNode = list.next();
       Savable valueSavable = readSavableFromMapElem(valueNode.asText(), null);
       res.put(keySavable, valueSavable);
-
     }
     currentNode = previousNode;
     return res;
@@ -785,7 +736,7 @@ public class JsonInputCapsule implements InputCapsule {
     return res;
   }
 
-  public ByteBuffer readByteBuffer(String name, ByteBuffer defVal) throws IOException {
+  public ByteBuffer readByteBuffer(String name, ByteBuffer defVal) {
     if (!currentNode.has(name)) {
       return defVal;
     }
@@ -819,41 +770,20 @@ public class JsonInputCapsule implements InputCapsule {
 
   public ArrayList<ByteBuffer> readByteBufferArrayList(String name, ArrayList<ByteBuffer> defVal)
       throws IOException {
-    try {
-      Element tmpEl = findChildElement(currentElem, name);
-      if (tmpEl == null) {
-        return defVal;
-      }
-
-      String sizeString = tmpEl.getAttribute("size");
-      ArrayList<ByteBuffer> tmp = new ArrayList<ByteBuffer>();
-      for (currentElem = findFirstChildElement(tmpEl);
-          currentElem != null;
-          currentElem = findNextSiblingElement(currentElem)) {
-        tmp.add(readByteBuffer(null, null));
-      }
-      if (sizeString.length() > 0) {
-        int requiredSize = Integer.parseInt(sizeString);
-        if (tmp.size() != requiredSize)
-          throw new IOException(
-              "Wrong number of short buffers for '"
-                  + name
-                  + "'.  size says "
-                  + requiredSize
-                  + ", data contains "
-                  + tmp.size());
-      }
-      currentElem = (Element) tmpEl.getParentNode();
-      return tmp;
-    } catch (IOException ioe) {
-      throw ioe;
-    } catch (NumberFormatException nfe) {
-      IOException io = new IOException(nfe.toString(), nfe);
-      throw io;
-    } catch (DOMException de) {
-      IOException io = new IOException(de.toString(), de);
-      throw io;
+    if (!currentNode.has(name)) {
+      return defVal;
     }
+    JsonNode arrayNode = currentNode.get(name);
+    ArrayList<ByteBuffer> res = new ArrayList<>();
+    for (int i = 0; i < arrayNode.size(); i++) {
+      JsonNode numberArrayNode = arrayNode.get(i);
+      ByteBuffer buffer = ByteBuffer.allocate(numberArrayNode.size());
+      for (int y = 0; y < numberArrayNode.size(); y++) {
+        buffer.put(Byte.parseByte(numberArrayNode.get(y).asText()));
+      }
+      res.add(buffer);
+    }
+    return res;
   }
 
   public <T extends Enum<T>> T readEnum(String name, Class<T> enumType, T defVal)
@@ -874,10 +804,4 @@ public class JsonInputCapsule implements InputCapsule {
     return ret;
   }
 
-  private static final String[] zeroStrings = new String[0];
-
-  protected String[] parseTokens(String inString) {
-    String[] outStrings = inString.split("\\s+");
-    return (outStrings.length == 1 && outStrings[0].length() == 0) ? zeroStrings : outStrings;
-  }
 }

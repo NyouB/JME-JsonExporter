@@ -356,11 +356,15 @@ class JsonInputCapsuleTest {
   @Test
   void readSavableArray2D() throws IOException {
     String json =
-        "{\"myField\":[[\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"myString\"}],[\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"myString\"}]]}";
-    Savable[] expected = new Savable[]{new TestSavable(), new TestSavable()};
+        "{\"myField\":[[[\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"myString\"}],[\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"myString\"}]],[[\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"myString\"}],[\"fr.jme.exporter.TestSavable\",{\"vector3f\":[\"com.jme3.math.Vector3f\",{\"x\":0.0,\"y\":0.0,\"z\":0.0}],\"colorRGBA\":[\"com.jme3.math.ColorRGBA\",{\"r\":1.0,\"g\":1.0,\"b\":1.0,\"a\":1.0}],\"myInt\":7890,\"myString\":\"myString\"}]]]}";
+    Savable[][] expected =
+        new Savable[][]{
+            new Savable[]{new TestSavable(), new TestSavable()},
+            new Savable[]{new TestSavable(), new TestSavable()}
+        };
     JsonImporter jsonImporter = new JsonImporter(new ByteArrayInputStream(json.getBytes()));
     JsonInputCapsule jsonInputCapsule = (JsonInputCapsule) jsonImporter.getCapsule(null);
-    Savable[] res = jsonInputCapsule.readSavableArray("myField", null);
+    Savable[][] res = jsonInputCapsule.readSavableArray2D("myField", null);
     Assertions.assertArrayEquals(expected, res);
   }
 
@@ -455,13 +459,13 @@ class JsonInputCapsuleTest {
     JsonImporter importer =
         new JsonImporter(new ByteArrayInputStream(json.getBytes()), TEST_ASSET_MANAGER);
     JsonInputCapsule jsonInputCapsule = (JsonInputCapsule) importer.getCapsule(null);
-    Map<? extends Savable, ? extends Savable> res = jsonInputCapsule
-        .readSavableMap("myField", null);
+    Map<? extends Savable, ? extends Savable> res =
+        jsonInputCapsule.readSavableMap("myField", null);
     Assertions.assertEquals(2, res.size());
-    Assertions
-        .assertEquals(new TestSavable("randomValue"), res.get(new TestSavable("savableKey1")));
-    Assertions
-        .assertEquals(new TestSavable("savablevalue"), res.get(new TestSavable("savableKey2")));
+    Assertions.assertEquals(
+        new TestSavable("randomValue"), res.get(new TestSavable("savableKey1")));
+    Assertions.assertEquals(
+        new TestSavable("savablevalue"), res.get(new TestSavable("savableKey2")));
   }
 
   @Test
@@ -612,7 +616,7 @@ class JsonInputCapsuleTest {
 
   @Test
   void readByteBufferArrayList() throws IOException {
-    String json = "{\"myField\":[[1.1,2.2,3.3],[1.1,2.2]]}";
+    String json = "{\"myField\":[[1,2,3],[1,2]]}";
     ByteBuffer buffer1 = ByteBuffer.allocate(3);
     buffer1.put((byte) 1);
     buffer1.put((byte) 2);

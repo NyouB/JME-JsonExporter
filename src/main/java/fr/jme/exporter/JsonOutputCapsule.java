@@ -527,8 +527,8 @@ public class JsonOutputCapsule implements OutputCapsule {
     }
 
     jsonGenerator.writeFieldName(name);
-    Iterator<? extends Map.Entry<? extends Savable, ? extends Savable>> entryIterator = map
-        .entrySet().iterator();
+    Iterator<? extends Map.Entry<? extends Savable, ? extends Savable>> entryIterator =
+        map.entrySet().iterator();
     jsonGenerator.writeStartArray();
     while (entryIterator.hasNext()) {
       Map.Entry<? extends Savable, ? extends Savable> entry = entryIterator.next();
@@ -542,7 +542,6 @@ public class JsonOutputCapsule implements OutputCapsule {
       jsonGenerator.writeStartObject();
       value.write(exporter);
       jsonGenerator.writeEndObject();
-
     }
     jsonGenerator.writeEndArray();
   }
