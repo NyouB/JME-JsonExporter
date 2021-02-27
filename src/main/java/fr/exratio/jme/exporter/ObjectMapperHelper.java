@@ -24,6 +24,10 @@ public class ObjectMapperHelper {
 
   private ObjectMapperHelper() {}
 
+  public static ObjectMapper defaultMapper() {
+    return configure(null, null);
+  }
+
   /**
    * This method help to configure (or to create if the object mapper parameter provided is null) an
    * ObjectMapper that will serialize and deserialize savable and scenes out of the box.
@@ -36,6 +40,8 @@ public class ObjectMapperHelper {
   public static ObjectMapper configure(
       ObjectMapper objectMapper, List<Class> polymorphClasses, String... acceptedPackages) {
     ObjectMapper result = objectMapper != null ? objectMapper : new ObjectMapper();
+
+    //Allow subtype of those classes to be serialize/deserialize
     Builder builder =
         BasicPolymorphicTypeValidator.builder()
             .allowIfSubType(Map.class)
@@ -50,11 +56,14 @@ public class ObjectMapperHelper {
     PolymorphicTypeValidator ptv = builder.build();
 
     result.activateDefaultTyping(ptv);
+    //only serialize public field or public getter
     result.setVisibility(PropertyAccessor.GETTER, Visibility.PUBLIC_ONLY);
     result.setVisibility(PropertyAccessor.FIELD, Visibility.PUBLIC_ONLY);
 
+
     String[] scannedPackages = ArrayUtils.add(acceptedPackages, JME_SAVABLE_PACKAGE);
-    ;
+    //Scan packages to find Savable implementation and setup the SavableMixIn which define the
+    //way of encoding the class and the deserializer to use
     try (ScanResult scanResult =
         new ClassGraph().enableClassInfo().acceptPackages(scannedPackages).scan()) {
       ClassInfoList classes = scanResult.getClassesImplementing(Savable.class.getName());

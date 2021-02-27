@@ -6,7 +6,7 @@
 
     <groupId>fr.exratio</groupId>
     <artifactId>JME-JsonExporter</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <distributionManagement>
         <repository>
             <id>bintray-exratio-jme-tool</id>

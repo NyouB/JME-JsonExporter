@@ -2,6 +2,30 @@
 
 A Json exporter to serializer deserialize jmonkey engine object using the existing interfaces
 
+## MAVEN/GRADLE
+
+Add this repository : https://dl.bintray.com/exratio/jme-tool
+
+Maven:  
+```xml
+<dependency>
+  <groupId>fr.exratio</groupId>
+  <artifactId>JME-JsonExporter</artifactId>
+  <version>1.1.0</version>
+  <type>pom</type>
+</dependency>
+```
+Gradle
+> implementation 'fr.exratio:JME-JsonExporter:1.1.0'
+
+
+## Quickstart example
+
+> ObjectMapper mapper = ObjectMapperHelper.defaultMapper();
+> mapper.writeValue(new File("savable.json"), new Box);
+
+> Box mybox = mapper.readValue(new File("savable.json"), Box.class);
+
 ## Default Configuration
 A default working ObjectMapper is provided via the ObjectMapperHelper class. It works out of the box for all Savable implementation declared
 in com.jme3 package.
@@ -28,7 +52,7 @@ Some example:
 
 ### Serialization
 
-First declare a jackson Serializer or use the default provided Serializer (SavableJsonSerializer.class)
+First declare a jackson Serializer or use the default provided Serializer (``SavableJsonSerializer.class)
 
 > public class SavableJsonSerializer extends JsonSerializer< Savable > {
 >
