@@ -1,4 +1,4 @@
-package fr.jme.exporter;
+package fr.exratio.jme.exporter;
 
 import com.jme3.asset.AssetKey;
 import com.jme3.asset.DesktopAssetManager;

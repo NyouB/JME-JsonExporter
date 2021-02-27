@@ -1,4 +1,4 @@
-package fr.jme.exporter;
+package fr.exratio.jme.exporter;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -451,7 +451,7 @@ public class JsonInputCapsule implements InputCapsule {
     }
   }
 
-  private Savable readSavableFromCurrentArrayElem(Savable defVal) throws IOException {
+  public Savable readSavableFromCurrentArrayElem(Savable defVal) throws IOException {
     JsonNode previousNode;
     JsonNode fieldsNode = currentNode.get(1);
     String className = currentNode.get(0).asText();
@@ -528,7 +528,7 @@ public class JsonInputCapsule implements InputCapsule {
     }
     JsonNode arrayNode = currentNode.get(name);
     JsonNode previousNode = currentNode;
-    if (arrayNode == null || arrayNode.size() < 1) {
+    if (arrayNode == null) {
       return defVal;
     }
     ArrayList<Savable> res = new ArrayList<>();

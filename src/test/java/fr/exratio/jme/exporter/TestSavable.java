@@ -1,4 +1,4 @@
-package fr.jme.exporter;
+package fr.exratio.jme.exporter;
 
 import com.jme3.export.InputCapsule;
 import com.jme3.export.JmeExporter;

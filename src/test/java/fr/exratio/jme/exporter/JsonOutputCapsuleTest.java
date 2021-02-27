@@ -1,4 +1,4 @@
-package fr.jme.exporter;
+package fr.exratio.jme.exporter;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;

@@ -30,7 +30,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package fr.jme.exporter;
+package fr.exratio.jme.exporter;
 
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonFactory;
@@ -92,6 +92,7 @@ public class JsonExporter implements JmeExporter {
     JsonFactory jfactory = new JsonFactory();
     JsonGenerator jGenerator = jfactory.createGenerator(f, JsonEncoding.UTF8);
     jsonOutputCapsule = new JsonOutputCapsule(jGenerator, this);
+    jsonOutputCapsule.write(object.getClass().getCanonicalName(), "type", null);
     object.write(this);
     f.flush();
   }

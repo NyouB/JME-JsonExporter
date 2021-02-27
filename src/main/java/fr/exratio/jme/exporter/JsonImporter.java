@@ -1,4 +1,4 @@
-package fr.jme.exporter;
+package fr.exratio.jme.exporter;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.jme3.asset.AssetInfo;
@@ -51,13 +51,19 @@ public class JsonImporter implements JmeImporter {
     this.assetManager = assetManager;
   }
 
-  public Object load(AssetInfo info) throws IOException {
+  public Savable load() throws IOException {
+    return jsonInputCapsule.readSavableFromCurrentArrayElem(null);
+  }
+
+  public Savable load(AssetInfo info) throws IOException {
     assetManager = info.getManager();
     InputStream in = info.openStream();
     try {
       return load(in);
     } finally {
-      if (in != null) in.close();
+      if (in != null) {
+        in.close();
+      }
     }
   }
 
@@ -75,7 +81,7 @@ public class JsonImporter implements JmeImporter {
   public Savable load(InputStream f) throws IOException {
     //
     jsonInputCapsule = new JsonInputCapsule(f, this);
-    return jsonInputCapsule.readSavable(null, null);
+    return load();
   }
 
   public InputCapsule getCapsule(Savable id) {
